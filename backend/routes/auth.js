@@ -1,4 +1,5 @@
-﻿const express = require("express");
+﻿```js
+const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
@@ -77,7 +78,7 @@ router.post("/register", async (req, res) => {
       name: name.trim(),
       email: normalizedEmail,
       password: hashedPassword,
-      balance: 10000,
+      balance: 0,
       role: "user"
     });
 
@@ -247,3 +248,4 @@ router.post(
 
 
 module.exports = router;
+```
