@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Notifications | Mirror Trading</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #07111f;
+    color: white;
+    min-height: 100vh;
+}
+
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 240px;
+    height: 100vh;
+    background: #0b1728;
+    border-right: 1px solid #1e334d;
+    padding: 25px 15px;
+}
+
+.logo {
+    font-size: 23px;
+    font-weight: bold;
+    padding: 0 15px 35px;
+}
+
+.logo span {
+    color: #22c55e;
+}
+
+.menu a {
+    display: block;
+    padding: 13px 15px;
+    margin-bottom: 6px;
+    color: #94a3b8;
+    text-decoration: none;
+    border-radius: 8px;
+}
+
+.menu a:hover,
+.menu a.active {
+    background: #13243a;
+    color: #22c55e;
+}
+
+.main {
+    margin-left: 240px;
+    padding: 35px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.header h1 {
+    font-size: 30px;
+    margin-bottom: 7px;
+}
+
+.subtitle {
+    color: #94a3b8;
+}
+
+.read-all {
+    background: #22c55e;
+    color: #04100a;
+    border: none;
+    padding: 11px 16px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.read-all:hover {
+    background: #16a34a;
+}
+
+.card {
+    background: #0d1b2d;
+    border: 1px solid #1e334d;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.notification {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+    border-bottom: 1px solid #1e334d;
+}
+
+.notification:last-child {
+    border-bottom: none;
+}
+
+.notification.unread {
+    background: rgba(34, 197, 94, 0.05);
+}
+
+.left {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.icon {
+    width: 45px;
+    height: 45px;
+    min-width: 45px;
+    border-radius: 50%;
+    background: #13243a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #22c55e;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.title {
+    font-size: 15px;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+.message {
+    color: #94a3b8;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.date {
+    color: #64748b;
+    font-size: 12px;
+    margin-top: 6px;
+}
+
+.right {
+    text-align: right;
+}
+
+.status {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 20px;
+    background: rgba(34, 197, 94, .12);
+    color: #22c55e;
+    font-size: 11px;
+    margin-bottom: 7px;
+}
+
+.mark-read {
+    display: block;
+    background: transparent;
+    border: 1px solid #334155;
+    color: #94a3b8;
+    padding: 6px 9px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 11px;
+}
+
+.mark-read:hover {
+    border-color: #22c55e;
+    color: #22c55e;
+}
+
+.loading,
+.empty,
+.error {
+    text-align: center;
+    padding: 50px 20px;
+    color: #94a3b8;
+}
+
+.error {
+    color: #fca5a5;
+}
+
+@media (max-width: 700px) {
+
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+    }
+
+    .main {
+        margin-left: 0;
+        padding: 20px;
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .notification {
+        align-items: flex-start;
+    }
+
+    .right {
+        text-align: right;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<aside class="sidebar">
+
+    <div class="logo">
+        Mirror<span>Trading</span>
+    </div>
+
+    <nav class="menu">
+
+        <a href="dashboard.html">
+            Dashboard
+        </a>
+
+        <a href="traders.html">
+            Top Traders
+        </a>
+
+        <a href="copy-trade.html">
+            Copy Trading
+        </a>
+
+        <a href="portfolio.html">
+            Portfolio
+        </a>
+
+        <a href="deposit.html">
+            Deposit
+        </a>
+
+        <a href="withdrawal.html">
+            Withdrawal
+        </a>
+
+        <a href="transfer.html">
+            Transfer
+        </a>
+
+        <a href="transactions.html">
+            Transactions
+        </a>
+
+        <a href="notifications.html" class="active">
+            Notifications
+        </a>
+
+        <a href="index.html">
+            Log Out
+        </a>
+
+    </nav>
+
+</aside>
+
+
+<main class="main">
+
+    <div class="header">
+
+        <div>
+            <h1>Notifications</h1>
+
+            <p class="subtitle">
+                Stay updated with your account activity.
+            </p>
+        </div>
+
+        <button class="read-all" onclick="markAllRead()">
+            Mark All as Read
+        </button>
+
+    </div>
+
+
+    <div class="card">
+
+        <div id="notifications">
+
+            <div class="loading">
+                Loading notifications...
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+
+<script>
+
+const API_URL = "http://localhost:5000";
+
+const token = localStorage.getItem("token");
+
+
+if (!token) {
+
+    window.location.href = "login.html";
+
+}
+
+
+function formatDate(date) {
+
+    if (!date) {
+        return "";
+    }
+
+    return new Date(date).toLocaleString("en-US", {
+        dateStyle: "medium",
+        timeStyle: "short"
+    });
+
+}
+
+
+function getIcon(type) {
+
+    switch (type) {
+
+        case "copy_trade":
+            return "↗";
+
+        case "transaction":
+            return "$";
+
+        case "profit_loss":
+            return "↑";
+
+        case "security":
+            return "🔒";
+
+        case "account":
+            return "●";
+
+        default:
+            return "●";
+
+    }
+
+}
+
+
+async function loadNotifications() {
+
+    const container =
+        document.getElementById("notifications");
+
+    try {
+
+        const response = await fetch(
+            `${API_URL}/api/notifications`,
+            {
+                method: "GET",
+
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            }
+        );
+
+
+        const data = await response.json();
+
+        console.log("NOTIFICATIONS:", data);
+
+
+        if (response.status === 401) {
+
+            localStorage.removeItem("token");
+
+            window.location.href = "login.html";
+
+            return;
+
+        }
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message || "Unable to load notifications"
+            );
+
+        }
+
+
+        container.innerHTML = "";
+
+
+        if (
+            !data.notifications ||
+            data.notifications.length === 0
+        ) {
+
+            container.innerHTML = `
+                <div class="empty">
+                    No notifications yet.
+                </div>
+            `;
+
+            return;
+
+        }
+
+
+        data.notifications.forEach(notification => {
+
+            const div =
+                document.createElement("div");
+
+
+            div.className =
+                "notification" +
+                (!notification.isRead ? " unread" : "");
+
+
+            div.innerHTML = `
+
+                <div class="left">
+
+                    <div class="icon">
+                        ${getIcon(notification.type)}
+                    </div>
+
+                    <div>
+
+                        <div class="title">
+                            ${escapeHtml(notification.title)}
+                        </div>
+
+                        <div class="message">
+                            ${escapeHtml(notification.message)}
+                        </div>
+
+                        <div class="date">
+                            ${formatDate(notification.createdAt)}
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="right">
+
+                    <div class="status">
+                        ${notification.isRead ? "Read" : "Unread"}
+                    </div>
+
+                    ${
+                        !notification.isRead
+                        ?
+                        `
+                        <button
+                            class="mark-read"
+                            onclick="markAsRead('${notification._id}')"
+                        >
+                            Mark Read
+                        </button>
+                        `
+                        :
+                        ""
+                    }
+
+                </div>
+
+            `;
+
+
+            container.appendChild(div);
+
+        });
+
+
+    } catch (error) {
+
+        console.error(
+            "NOTIFICATION ERROR:",
+            error
+        );
+
+
+        container.innerHTML = `
+
+            <div class="error">
+
+                Unable to load notifications.
+
+                <br><br>
+
+                ${escapeHtml(error.message)}
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+async function markAsRead(id) {
+
+    try {
+
+        const response = await fetch(
+
+            `${API_URL}/api/notifications/${id}/read`,
+
+            {
+
+                method: "PATCH",
+
+                headers: {
+
+                    "Authorization": `Bearer ${token}`
+
+                }
+
+            }
+
+        );
+
+
+        if (response.status === 401) {
+
+            localStorage.removeItem("token");
+
+            window.location.href = "login.html";
+
+            return;
+
+        }
+
+
+        if (!response.ok) {
+
+            const data = await response.json();
+
+            alert(
+                data.message ||
+                "Unable to mark notification as read."
+            );
+
+            return;
+
+        }
+
+
+        loadNotifications();
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Unable to connect to the backend."
+        );
+
+    }
+
+}
+
+
+async function markAllRead() {
+
+    try {
+
+        const response = await fetch(
+
+            `${API_URL}/api/notifications/read-all`,
+
+            {
+
+                method: "PATCH",
+
+                headers: {
+
+                    "Authorization": `Bearer ${token}`
+
+                }
+
+            }
+
+        );
+
+
+        if (response.status === 401) {
+
+            localStorage.removeItem("token");
+
+            window.location.href = "login.html";
+
+            return;
+
+        }
+
+
+        if (!response.ok) {
+
+            const data = await response.json();
+
+            alert(
+                data.message ||
+                "Unable to update notifications."
+            );
+
+            return;
+
+        }
+
+
+        loadNotifications();
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Unable to connect to the backend."
+        );
+
+    }
+
+}
+
+
+function escapeHtml(value) {
+
+    return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+loadNotifications();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Transactions | Mirror Trading</title>
+
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #07111f;
+  color: white;
+  min-height: 100vh;
+}
+
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 240px;
+  height: 100vh;
+  background: #0b1728;
+  border-right: 1px solid #1e334d;
+  padding: 25px 15px;
+}
+
+.logo {
+  font-size: 23px;
+  font-weight: bold;
+  padding: 0 15px 35px;
+}
+
+.logo span {
+  color: #22c55e;
+}
+
+.menu a {
+  display: block;
+  padding: 14px 15px;
+  margin-bottom: 6px;
+  color: #94a3b8;
+  text-decoration: none;
+  border-radius: 8px;
+}
+
+.menu a:hover,
+.menu .active {
+  background: #13243a;
+  color: #22c55e;
+}
+
+.main {
+  margin-left: 240px;
+  padding: 35px;
+}
+
+.topbar {
+  margin-bottom: 30px;
+}
+
+.topbar h1 {
+  font-size: 30px;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  color: #94a3b8;
+}
+
+.section {
+  background: #0d1b2d;
+  border: 1px solid #1e334d;
+  border-radius: 14px;
+  padding: 25px;
+}
+
+.transaction {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 0;
+  border-bottom: 1px solid #1e334d;
+}
+
+.transaction:last-child {
+  border-bottom: none;
+}
+
+.transaction-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.icon {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: #13243a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #22c55e;
+  font-weight: bold;
+}
+
+.transaction-type {
+  font-weight: bold;
+  margin-bottom: 6px;
+  text-transform: capitalize;
+}
+
+.description {
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.date {
+  color: #64748b;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.transaction-right {
+  text-align: right;
+}
+
+.amount {
+  font-size: 17px;
+  font-weight: bold;
+}
+
+.deposit,
+.profit {
+  color: #22c55e;
+}
+
+.withdrawal,
+.loss {
+  color: #ef4444;
+}
+
+.copy_trade {
+  color: #facc15;
+}
+
+.status {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 5px 9px;
+  border-radius: 15px;
+  background: rgba(34, 197, 94, .12);
+  color: #22c55e;
+  font-size: 11px;
+  text-transform: capitalize;
+}
+
+.loading,
+.empty,
+.error {
+  text-align: center;
+  padding: 50px 20px;
+  color: #94a3b8;
+}
+
+.error {
+  color: #fca5a5;
+}
+
+@media (max-width: 700px) {
+
+  .sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+  }
+
+  .main {
+    margin-left: 0;
+    padding: 20px;
+  }
+
+  .transaction {
+    align-items: flex-start;
+  }
+
+  .transaction-right {
+    text-align: right;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<aside class="sidebar">
+
+  <div class="logo">
+    Mirror<span>Trading</span>
+  </div>
+
+  <nav class="menu">
+
+    <a href="dashboard.html">
+      Dashboard
+    </a>
+
+    <a href="traders.html">
+      Top Traders
+    </a>
+
+    <a href="copy-trade.html">
+      Copy Trading
+    </a>
+
+    <a href="portfolio.html">
+      Portfolio
+    </a>
+
+    <a href="deposit.html">
+      Deposit
+    </a>
+
+    <a href="withdrawal.html">
+      Withdrawal
+    </a>
+
+    <a href="transfer.html">
+      Transfer
+    </a>
+
+    <a href="transactions.html" class="active">
+      Transactions
+    </a>
+
+    <a href="notifications.html">
+      Notifications
+    </a>
+
+    <a href="index.html">
+      Log Out
+    </a>
+
+  </nav>
+
+</aside>
+
+
+<main class="main">
+
+  <div class="topbar">
+
+    <h1>Transactions</h1>
+
+    <p class="subtitle">
+      View your account activity and transaction history.
+    </p>
+
+  </div>
+
+
+  <section class="section">
+
+    <div id="transactions">
+
+      <div class="loading">
+        Loading transactions...
+      </div>
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<script>
+
+const API_URL = "http://localhost:5000";
+
+const token = localStorage.getItem("token");
+
+
+// ------------------------------------------------------
+// CHECK LOGIN
+// ------------------------------------------------------
+
+if (!token) {
+
+  window.location.href = "login.html";
+
+}
+
+
+// ------------------------------------------------------
+// FORMAT MONEY
+// ------------------------------------------------------
+
+function money(value) {
+
+  return new Intl.NumberFormat("en-US", {
+
+    style: "currency",
+
+    currency: "USD"
+
+  }).format(Number(value) || 0);
+
+}
+
+
+// ------------------------------------------------------
+// FORMAT DATE
+// ------------------------------------------------------
+
+function formatDate(date) {
+
+  if (!date) {
+    return "";
+  }
+
+  return new Date(date).toLocaleString("en-US", {
+
+    dateStyle: "medium",
+
+    timeStyle: "short"
+
+  });
+
+}
+
+
+// ------------------------------------------------------
+// TRANSACTION ICON
+// ------------------------------------------------------
+
+function getIcon(type) {
+
+  switch (type) {
+
+    case "deposit":
+      return "+";
+
+    case "withdrawal":
+      return "−";
+
+    case "copy_trade":
+      return "↗";
+
+    case "profit":
+      return "↑";
+
+    case "loss":
+      return "↓";
+
+    default:
+      return "$";
+
+  }
+
+}
+
+
+// ------------------------------------------------------
+// LOAD TRANSACTIONS
+// ------------------------------------------------------
+
+async function loadTransactions() {
+
+  const container =
+    document.getElementById("transactions");
+
+  try {
+
+    const response = await fetch(
+
+      `${API_URL}/api/transactions`,
+
+      {
+
+        method: "GET",
+
+        headers: {
+
+          "Authorization": `Bearer ${token}`
+
+        }
+
+      }
+
+    );
+
+
+    if (!response.ok) {
+
+      if (response.status === 401) {
+
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
+        window.location.href = "login.html";
+
+        return;
+
+      }
+
+      throw new Error(
+        "Unable to load transactions"
+      );
+
+    }
+
+
+    const data = await response.json();
+
+
+    console.log(
+      "TRANSACTIONS DATA:",
+      data
+    );
+
+
+    container.innerHTML = "";
+
+
+    if (
+      !data.transactions ||
+      data.transactions.length === 0
+    ) {
+
+      container.innerHTML = `
+
+        <div class="empty">
+
+          No transactions yet.
+
+        </div>
+
+      `;
+
+      return;
+
+    }
+
+
+    data.transactions.forEach(transaction => {
+
+      const div =
+        document.createElement("div");
+
+
+      div.className =
+        "transaction";
+
+
+      const type =
+        transaction.type || "transaction";
+
+
+      const amount =
+        Number(transaction.amount) || 0;
+
+
+      div.innerHTML = `
+
+        <div class="transaction-left">
+
+          <div class="icon">
+
+            ${getIcon(type)}
+
+          </div>
+
+
+          <div>
+
+            <div class="transaction-type">
+
+              ${type.replace("_", " ")}
+
+            </div>
+
+
+            <div class="description">
+
+              ${transaction.description || "Account transaction"}
+
+            </div>
+
+
+            <div class="date">
+
+              ${formatDate(transaction.createdAt)}
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="transaction-right">
+
+          <div class="amount ${type}">
+
+            ${type === "withdrawal" || type === "loss" ? "-" : "+"}
+            ${money(amount)}
+
+          </div>
+
+
+          <div class="status">
+
+            ${transaction.status || "completed"}
+
+          </div>
+
+        </div>
+
+      `;
+
+
+      container.appendChild(div);
+
+    });
+
+
+  } catch (error) {
+
+    console.error(
+      "TRANSACTIONS ERROR:",
+      error
+    );
+
+
+    container.innerHTML = `
+
+      <div class="error">
+
+        Unable to load transactions.
+        Please make sure the backend is running.
+
+      </div>
+
+    `;
+
+  }
+
+}
+
+
+// ------------------------------------------------------
+// START
+// ------------------------------------------------------
+
+loadTransactions();
+
+</script>
+
+</body>
+</html>

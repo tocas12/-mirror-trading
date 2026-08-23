@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard | Mirror Trading</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #07111f;
+    color: #fff;
+    min-height: 100vh;
+}
+
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 240px;
+    height: 100vh;
+    background: #0b1728;
+    border-right: 1px solid #1e334d;
+    padding: 25px 15px;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    padding: 0 15px 35px;
+}
+
+.logo span {
+    color: #22c55e;
+}
+
+.menu a {
+    display: block;
+    padding: 13px 15px;
+    margin-bottom: 6px;
+    color: #94a3b8;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: 0.2s;
+}
+
+.menu a:hover,
+.menu a.active {
+    background: #13243a;
+    color: #22c55e;
+}
+
+.logout {
+    color: #f87171 !important;
+}
+
+.main {
+    margin-left: 240px;
+    padding: 30px;
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+h1 {
+    font-size: 30px;
+    margin-bottom: 6px;
+}
+
+.welcome {
+    color: #94a3b8;
+}
+
+.account {
+    background: #0d1b2d;
+    border: 1px solid #1e334d;
+    padding: 12px 18px;
+    border-radius: 10px;
+}
+
+.account strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.account span {
+    color: #22c55e;
+    font-size: 12px;
+}
+
+.balance-card {
+    background: linear-gradient(135deg, #123d2a, #0d1b2d);
+    border: 1px solid #24543b;
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 20px;
+}
+
+.balance-label {
+    color: #94a3b8;
+    margin-bottom: 10px;
+}
+
+.balance {
+    font-size: 38px;
+    font-weight: bold;
+}
+
+.currency {
+    color: #22c55e;
+    font-size: 14px;
+    margin-left: 8px;
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.actions a {
+    padding: 11px 17px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: white;
+    border: 1px solid #334155;
+}
+
+.actions .primary {
+    background: #22c55e;
+    color: #04100a;
+    border-color: #22c55e;
+    font-weight: bold;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.card {
+    background: #0d1b2d;
+    border: 1px solid #1e334d;
+    border-radius: 14px;
+    padding: 20px;
+}
+
+.card p {
+    color: #94a3b8;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+.amount {
+    font-size: 23px;
+    font-weight: bold;
+}
+
+.green {
+    color: #22c55e;
+}
+
+.content {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 20px;
+}
+
+.section {
+    background: #0d1b2d;
+    border: 1px solid #1e334d;
+    border-radius: 14px;
+    padding: 22px;
+    margin-bottom: 20px;
+}
+
+.section h2 {
+    font-size: 18px;
+    margin-bottom: 18px;
+}
+
+.item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #1e334d;
+}
+
+.item:last-child {
+    border-bottom: none;
+}
+
+.item-title {
+    font-weight: bold;
+}
+
+.item-info {
+    color: #94a3b8;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.item-value {
+    color: #22c55e;
+    font-weight: bold;
+}
+
+.loading {
+    color: #94a3b8;
+    padding: 15px 0;
+}
+
+.error {
+    color: #fca5a5;
+    background: #24151a;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.trader-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 13px 0;
+    border-bottom: 1px solid #1e334d;
+}
+
+.trader-name {
+    font-weight: bold;
+}
+
+.trader-profit {
+    color: #22c55e;
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.trade-row {
+    padding: 14px 0;
+    border-bottom: 1px solid #1e334d;
+}
+
+.trade-row:last-child {
+    border-bottom: none;
+}
+
+.trade-name {
+    font-weight: bold;
+}
+
+.trade-info {
+    color: #94a3b8;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.transaction-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid #1e334d;
+}
+
+.transaction-row:last-child {
+    border-bottom: none;
+}
+
+.transaction-title {
+    font-weight: bold;
+}
+
+.transaction-info {
+    color: #94a3b8;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.transaction-amount {
+    color: #22c55e;
+    font-weight: bold;
+}
+
+@media (max-width: 1000px) {
+    .cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .content {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 700px) {
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+    }
+
+    .main {
+        margin-left: 0;
+        padding: 20px;
+    }
+
+    .cards {
+        grid-template-columns: 1fr;
+    }
+
+    .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .actions {
+        flex-wrap: wrap;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<aside class="sidebar">
+
+    <div class="logo">
+        Mirror<span>Trading</span>
+    </div>
+
+    <nav class="menu">
+
+        <a href="dashboard.html" class="active">Dashboard</a>
+
+        <a href="traders.html">Top Traders</a>
+
+        <a href="copy-trade.html">Copy Trading</a>
+
+        <a href="deposit.html">Deposit</a>
+
+        <a href="withdrawal.html">Withdrawal</a>
+
+        <a href="transfer.html">Transfer</a>
+
+        <a href="portfolio.html">Portfolio</a>
+
+        <a href="transactions.html">Transactions</a>
+
+        <a href="notifications.html">Notifications</a>
+
+        <a href="admin.html" id="adminLink" style="display:none;">Admin Control</a>
+
+        <a href="index.html" class="logout" onclick="logout()">
+            Log Out
+        </a>
+
+    </nav>
+
+</aside>
+
+
+<main class="main">
+
+    <div class="topbar">
+
+        <div>
+            <h1>Dashboard</h1>
+
+            <p class="welcome" id="welcome">
+                Welcome back
+            </p>
+        </div>
+
+        <div class="account">
+
+            <strong id="accountName">
+                Account
+            </strong>
+
+            <span>● Account Active</span>
+
+        </div>
+
+    </div>
+
+
+    <section class="balance-card">
+
+        <div class="balance-label">
+            Available Balance
+        </div>
+
+        <div>
+            <span class="balance" id="balance">
+                $0.00
+            </span>
+
+            <span class="currency" id="currency">
+                USD
+            </span>
+        </div>
+
+        <div class="actions">
+
+            <a href="deposit.html" class="primary">
+                + Deposit
+            </a>
+
+            <a href="withdrawal.html">
+                Withdraw
+            </a>
+
+            <a href="transfer.html">
+                Transfer
+            </a>
+
+        </div>
+
+    </section>
+
+
+    <section class="cards">
+
+        <div class="card">
+            <p>Portfolio Value</p>
+            <div class="amount" id="portfolioValue">
+                $0.00
+            </div>
+        </div>
+
+        <div class="card">
+            <p>Total Profit / Loss</p>
+            <div class="amount green" id="profitLoss">
+                $0.00
+            </div>
+        </div>
+
+        <div class="card">
+            <p>Active Copies</p>
+            <div class="amount" id="activeCount">
+                0
+            </div>
+        </div>
+
+        <div class="card">
+            <p>Notifications</p>
+            <div class="amount" id="notificationCount">
+                0
+            </div>
+        </div>
+
+    </section>
+
+
+    <div class="content">
+
+        <div>
+
+            <section class="section">
+
+                <h2>Active Copy Trades</h2>
+
+                <div id="activeCopies">
+                    <div class="loading">
+                        Loading copy trades...
+                    </div>
+                </div>
+
+            </section>
+
+
+            <section class="section">
+
+                <h2>Recent Transactions</h2>
+
+                <div id="transactions">
+                    <div class="loading">
+                        Loading transactions...
+                    </div>
+                </div>
+
+            </section>
+
+        </div>
+
+
+        <div>
+
+            <section class="section">
+
+                <h2>Top Traders</h2>
+
+                <div id="traders">
+                    <div class="loading">
+                        Loading traders...
+                    </div>
+                </div>
+
+            </section>
+
+
+            <section class="section">
+
+                <h2>Account Summary</h2>
+
+                <div class="item">
+
+                    <div>
+                        <div class="item-title">
+                            Available Balance
+                        </div>
+
+                        <div class="item-info">
+                            Funds available
+                        </div>
+                    </div>
+
+                    <div class="item-value" id="summaryBalance">
+                        $0.00
+                    </div>
+
+                </div>
+
+
+                <div class="item">
+
+                    <div>
+                        <div class="item-title">
+                            Invested
+                        </div>
+
+                        <div class="item-info">
+                            Active investments
+                        </div>
+                    </div>
+
+                    <div class="item-value" id="summaryInvested">
+                        $0.00
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </div>
+
+</main>
+
+
+<script>
+
+const API_URL = "http://localhost:5000";
+
+const token = localStorage.getItem("token");
+
+
+function money(value) {
+
+    return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD"
+    }).format(Number(value) || 0);
+
+}
+
+
+function logout() {
+
+    localStorage.removeItem("token");
+
+    window.location.href = "login.html";
+
+}
+
+
+if (!token) {
+
+    window.location.href = "login.html";
+
+}
+
+
+async function checkAdminAccess() {
+
+    try {
+
+        const response = await fetch(
+            `${API_URL}/api/admin/summary`,
+            {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            }
+        );
+
+        if (response.ok) {
+
+            document.getElementById("adminLink").style.display = "block";
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "ADMIN CHECK ERROR:",
+            error
+        );
+
+    }
+}
+
+checkAdminAccess();
+
+
+async function loadDashboard() {
+
+    try {
+
+        const response = await fetch(
+            `${API_URL}/api/dashboard`,
+            {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            }
+        );
+
+
+        if (!response.ok) {
+
+            if (response.status === 401) {
+
+                logout();
+                return;
+
+            }
+
+            throw new Error(
+                "Dashboard request failed: " +
+                response.status
+            );
+
+        }
+
+
+        const data = await response.json();
+
+        console.log("Dashboard data:", data);
+
+
+        /*
+        USER
+        */
+
+        if (data.user) {
+
+            document.getElementById("welcome").textContent =
+                `Welcome back, ${data.user.name}`;
+
+            document.getElementById("accountName").textContent =
+                data.user.name;
+
+        }
+
+
+        /*
+        BALANCE
+        */
+
+        document.getElementById("balance").textContent =
+            money(data.balance);
+
+        document.getElementById("summaryBalance").textContent =
+            money(data.balance);
+
+
+        /*
+        CURRENCY
+        */
+
+        document.getElementById("currency").textContent =
+            data.currency || "USD";
+
+
+        /*
+        PORTFOLIO
+        */
+
+        if (data.portfolio) {
+
+            document.getElementById("portfolioValue").textContent =
+                money(data.portfolio.portfolioValue);
+
+            document.getElementById("profitLoss").textContent =
+                money(data.portfolio.totalProfitLoss);
+
+            document.getElementById("summaryInvested").textContent =
+                money(data.portfolio.totalInvested);
+
+        }
+
+
+        /*
+        ACTIVE COPY TRADES
+        */
+
+        const activeContainer =
+            document.getElementById("activeCopies");
+
+        activeContainer.innerHTML = "";
+
+
+        const activeTrades =
+            data.activeCopyTrades &&
+            data.activeCopyTrades.items
+                ? data.activeCopyTrades.items
+                : [];
+
+
+        document.getElementById("activeCount").textContent =
+            data.activeCopyTrades
+                ? data.activeCopyTrades.count || activeTrades.length
+                : activeTrades.length;
+
+
+        if (activeTrades.length === 0) {
+
+            activeContainer.innerHTML =
+                `<div class="loading">
+                    No active copy trades.
+                </div>`;
+
+        } else {
+
+            activeTrades.forEach(trade => {
+
+                const row =
+                    document.createElement("div");
+
+                row.className = "trade-row";
+
+                const traderName =
+                    trade.trader?.name ||
+                    trade.traderName ||
+                    trade.name ||
+                    "Trader";
+
+                const amount =
+                    trade.amount ||
+                    trade.allocation ||
+                    0;
+
+                row.innerHTML = `
+                    <div class="trade-name">
+                        ${traderName}
+                    </div>
+
+                    <div class="trade-info">
+                        Allocation: ${money(amount)}
+                    </div>
+
+                    <div class="trade-info">
+                        Status: Active
+                    </div>
+                `;
+
+                activeContainer.appendChild(row);
+
+            });
+
+        }
+
+
+        /*
+        RECENT TRANSACTIONS
+        */
+
+        const transactionContainer =
+            document.getElementById("transactions");
+
+        transactionContainer.innerHTML = "";
+
+
+        const transactions =
+            data.recentTransactions || [];
+
+
+        if (transactions.length === 0) {
+
+            transactionContainer.innerHTML =
+                `<div class="loading">
+                    No recent transactions.
+                </div>`;
+
+        } else {
+
+            transactions.forEach(transaction => {
+
+                const row =
+                    document.createElement("div");
+
+                row.className =
+                    "transaction-row";
+
+
+                row.innerHTML = `
+
+                    <div>
+
+                        <div class="transaction-title">
+                            ${transaction.type || "Transaction"}
+                        </div>
+
+                        <div class="transaction-info">
+                            ${transaction.description || ""}
+                        </div>
+
+                    </div>
+
+                    <div class="transaction-amount">
+                        ${money(transaction.amount)}
+                    </div>
+
+                `;
+
+
+                transactionContainer.appendChild(row);
+
+            });
+
+        }
+
+
+        /*
+        NOTIFICATIONS
+        */
+
+        document.getElementById("notificationCount").textContent =
+            data.unreadNotifications || 0;
+
+
+        /*
+        TOP TRADERS
+        */
+
+        loadTraders();
+
+
+    } catch (error) {
+
+        console.error(
+            "DASHBOARD ERROR:",
+            error
+        );
+
+
+        document.getElementById("activeCopies").innerHTML =
+            `<div class="error">
+                Unable to load dashboard data.
+                Make sure the backend is running on port 5000.
+            </div>`;
+
+
+        document.getElementById("transactions").innerHTML =
+            `<div class="error">
+                Backend connection failed.
+            </div>`;
+
+    }
+
+}
+
+
+async function loadTraders() {
+
+    const container =
+        document.getElementById("traders");
+
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_URL}/api/traders`
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Unable to load traders"
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        const traders =
+            data.traders || [];
+
+
+        container.innerHTML = "";
+
+
+        if (traders.length === 0) {
+
+            container.innerHTML =
+                `<div class="loading">
+                    No traders available.
+                </div>`;
+
+            return;
+
+        }
+
+
+        traders.slice(0, 5).forEach(trader => {
+
+            const row =
+                document.createElement("div");
+
+            row.className =
+                "trader-row";
+
+
+            row.innerHTML = `
+
+                <div>
+
+                    <div class="trader-name">
+                        ${trader.name || "Trader"}
+                    </div>
+
+                    <div class="trader-profit">
+                        +${Number(
+                            trader.profitPercentage || 0
+                        ).toFixed(1)}% profit
+                    </div>
+
+                </div>
+
+            `;
+
+
+            container.appendChild(row);
+
+        });
+
+
+    } catch (error) {
+
+        console.error(
+            "TRADERS ERROR:",
+            error
+        );
+
+
+        container.innerHTML =
+            `<div class="error">
+                Unable to load traders.
+            </div>`;
+
+    }
+
+}
+
+
+loadDashboard();
+
+</script>
+
+</body>
+</html>

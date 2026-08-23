@@ -1,0 +1,734 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Copy Trade | Mirror Trading</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #07111f;
+      color: white;
+      min-height: 100vh;
+      padding: 30px 20px;
+    }
+
+    .container {
+      max-width: 650px;
+      margin: auto;
+    }
+
+    .card {
+      background: #0d1b2d;
+      border: 1px solid #1e334d;
+      border-radius: 18px;
+      padding: 30px;
+      box-shadow: 0 20px 50px rgba(0,0,0,.25);
+    }
+
+    .logo {
+      font-size: 25px;
+      font-weight: bold;
+      margin-bottom: 30px;
+    }
+
+    .logo span {
+      color: #22c55e;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    .description {
+      color: #94a3b8;
+      line-height: 1.6;
+      margin-bottom: 25px;
+    }
+
+    .balance-card {
+      background: #07111f;
+      border: 1px solid #1e334d;
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 20px;
+    }
+
+    .balance-label {
+      color: #94a3b8;
+      font-size: 13px;
+    }
+
+    .balance {
+      color: #22c55e;
+      font-size: 25px;
+      font-weight: bold;
+      margin-top: 6px;
+    }
+
+    .trader {
+      padding: 20px;
+      background: #13243a;
+      border-radius: 12px;
+      margin-bottom: 25px;
+    }
+
+    .trader-name {
+      font-size: 21px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .trader-info {
+      color: #94a3b8;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .profit {
+      color: #22c55e;
+      font-weight: bold;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      color: #cbd5e1;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      background: #07111f;
+      color: white;
+      outline: none;
+      font-size: 15px;
+    }
+
+    input:focus {
+      border-color: #22c55e;
+    }
+
+    .summary {
+      background: #07111f;
+      border: 1px solid #1e334d;
+      border-radius: 12px;
+      padding: 18px;
+      margin: 25px 0;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 9px 0;
+      color: #94a3b8;
+    }
+
+    .summary-row strong {
+      color: white;
+    }
+
+    .notice {
+      padding: 15px;
+      background: #13243a;
+      color: #94a3b8;
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .message {
+      display: none;
+      padding: 14px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .success {
+      display: block;
+      background: rgba(34,197,94,.12);
+      border: 1px solid #22c55e;
+      color: #86efac;
+    }
+
+    .error {
+      display: block;
+      background: rgba(239,68,68,.12);
+      border: 1px solid #ef4444;
+      color: #fca5a5;
+    }
+
+    button {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 8px;
+      background: #22c55e;
+      color: #04100a;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #16a34a;
+    }
+
+    button:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
+    .back {
+      display: inline-block;
+      margin-top: 20px;
+      color: #22c55e;
+      text-decoration: none;
+    }
+
+    .loading {
+      color: #94a3b8;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="card">
+
+    <div class="logo">
+      Mirror<span>Trading</span>
+    </div>
+
+    <h1>Copy Trader</h1>
+
+    <p class="description">
+      Choose how much you want to allocate to this trader.
+      Your available balance is checked by the backend.
+    </p>
+
+    <div class="balance-card">
+      <div class="balance-label">
+        Available Balance
+      </div>
+
+      <div class="balance" id="balance">
+        Loading...
+      </div>
+    </div>
+
+    <div id="message" class="message"></div>
+
+    <div class="trader">
+
+      <div class="trader-name" id="traderName">
+        Loading trader...
+      </div>
+
+      <div class="trader-info">
+        Username:
+        <span id="username">—</span>
+        <br>
+
+        Profit:
+        <span class="profit" id="profit">—</span>
+        <br>
+
+        Win Rate:
+        <span id="winRate">—</span>
+        <br>
+
+        Risk:
+        <span id="riskLevel">—</span>
+      </div>
+
+    </div>
+
+    <form id="copyTradeForm">
+
+      <div class="form-group">
+
+        <label for="amount">
+          Allocation Amount (USD)
+        </label>
+
+        <input
+          type="number"
+          id="amount"
+          min="1"
+          step="0.01"
+          placeholder="Enter amount"
+          required
+        >
+
+      </div>
+
+      <div class="summary">
+
+        <div class="summary-row">
+          <span>Trader</span>
+          <strong id="summaryTrader">—</strong>
+        </div>
+
+        <div class="summary-row">
+          <span>Allocation</span>
+          <strong id="summaryAmount">$0.00</strong>
+        </div>
+
+        <div class="summary-row">
+          <span>Remaining Balance</span>
+          <strong id="remainingBalance">$0.00</strong>
+        </div>
+
+      </div>
+
+      <div class="notice">
+        This action will allocate the selected amount from your
+        account balance to the trader. Make sure the amount is correct
+        before starting the copy trade.
+      </div>
+
+      <button type="submit" id="copyButton">
+        Start Copy Trading
+      </button>
+
+    </form>
+
+    <a class="back" href="traders.html">
+      ← Back to Traders
+    </a>
+
+  </div>
+
+</div>
+
+
+<script>
+
+const API_URL = "http://localhost:5000";
+
+const token = localStorage.getItem("token");
+
+
+// ------------------------------------------------------
+// CHECK LOGIN
+// ------------------------------------------------------
+
+if (!token) {
+
+  window.location.href = "login.html";
+
+}
+
+
+// ------------------------------------------------------
+// GET TRADER ID FROM URL
+// ------------------------------------------------------
+
+const params = new URLSearchParams(
+  window.location.search
+);
+
+const traderId = params.get("traderId");
+
+
+// ------------------------------------------------------
+// VARIABLES
+// ------------------------------------------------------
+
+let currentBalance = 0;
+let selectedTrader = null;
+
+
+// ------------------------------------------------------
+// MONEY FORMAT
+// ------------------------------------------------------
+
+function money(value) {
+
+  return new Intl.NumberFormat("en-US", {
+
+    style: "currency",
+
+    currency: "USD"
+
+  }).format(Number(value) || 0);
+
+}
+
+
+// ------------------------------------------------------
+// MESSAGE
+// ------------------------------------------------------
+
+function showMessage(text, type) {
+
+  const message =
+    document.getElementById("message");
+
+  message.textContent = text;
+
+  message.className =
+    "message " + type;
+
+}
+
+
+// ------------------------------------------------------
+// LOAD DASHBOARD BALANCE
+// ------------------------------------------------------
+
+async function loadBalance() {
+
+  const response = await fetch(
+    `${API_URL}/api/dashboard`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  );
+
+  if (!response.ok) {
+
+    throw new Error(
+      "Unable to load account balance"
+    );
+
+  }
+
+  const data = await response.json();
+
+  currentBalance =
+    Number(data.balance) || 0;
+
+  document.getElementById("balance")
+    .textContent = money(currentBalance);
+
+  updateRemainingBalance();
+
+}
+
+
+// ------------------------------------------------------
+// LOAD TRADER
+// ------------------------------------------------------
+
+async function loadTrader() {
+
+  if (!traderId) {
+
+    showMessage(
+      "No trader was selected. Please go back to Top Traders.",
+      "error"
+    );
+
+    document.getElementById("traderName")
+      .textContent = "No trader selected";
+
+    return;
+
+  }
+
+  const response = await fetch(
+    `${API_URL}/api/traders/${traderId}`
+  );
+
+  if (!response.ok) {
+
+    throw new Error(
+      "Unable to load trader"
+    );
+
+  }
+
+  const data = await response.json();
+
+  selectedTrader =
+    data.trader || data;
+
+  const trader =
+    selectedTrader;
+
+  document.getElementById("traderName")
+    .textContent =
+      trader.name || "Trader";
+
+  document.getElementById("username")
+    .textContent =
+      trader.username || "—";
+
+  document.getElementById("profit")
+    .textContent =
+      `+${Number(
+        trader.profitPercentage || 0
+      ).toFixed(1)}%`;
+
+  document.getElementById("winRate")
+    .textContent =
+      `${Number(
+        trader.winRate || 0
+      ).toFixed(1)}%`;
+
+  document.getElementById("riskLevel")
+    .textContent =
+      trader.riskLevel || "Unknown";
+
+  document.getElementById("summaryTrader")
+    .textContent =
+      trader.name || "Trader";
+
+}
+
+
+// ------------------------------------------------------
+// REMAINING BALANCE
+// ------------------------------------------------------
+
+function updateRemainingBalance() {
+
+  const amount =
+    Number(
+      document.getElementById("amount").value
+    ) || 0;
+
+  const remaining =
+    currentBalance - amount;
+
+  const element =
+    document.getElementById(
+      "remainingBalance"
+    );
+
+  element.textContent =
+    money(remaining);
+
+}
+
+
+// ------------------------------------------------------
+// AMOUNT INPUT
+// ------------------------------------------------------
+
+document
+  .getElementById("amount")
+  .addEventListener(
+    "input",
+    function () {
+
+      const amount =
+        Number(this.value) || 0;
+
+      document.getElementById(
+        "summaryAmount"
+      ).textContent =
+        money(amount);
+
+      updateRemainingBalance();
+
+    }
+  );
+
+
+// ------------------------------------------------------
+// START COPY TRADE
+// ------------------------------------------------------
+
+document
+  .getElementById("copyTradeForm")
+  .addEventListener(
+    "submit",
+    async function(event) {
+
+      event.preventDefault();
+
+      const amount =
+        Number(
+          document.getElementById("amount").value
+        );
+
+      const button =
+        document.getElementById("copyButton");
+
+
+      if (!traderId) {
+
+        showMessage(
+          "Please select a trader first.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      if (!Number.isFinite(amount) || amount <= 0) {
+
+        showMessage(
+          "Enter a valid allocation amount.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      if (amount > currentBalance) {
+
+        showMessage(
+          "Insufficient balance for this allocation.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      button.disabled = true;
+
+      button.textContent =
+        "Starting Copy Trade...";
+
+
+      try {
+
+        const response = await fetch(
+          `${API_URL}/api/copy-trading`,
+          {
+            method: "POST",
+
+            headers: {
+
+              "Content-Type":
+                "application/json",
+
+              "Authorization":
+                `Bearer ${token}`
+
+            },
+
+            body: JSON.stringify({
+
+              traderId: traderId,
+
+              amount: amount
+
+            })
+
+          }
+        );
+
+
+        const data =
+          await response.json();
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            data.message ||
+            "Unable to start copy trading"
+          );
+
+        }
+
+
+        showMessage(
+          "Copy trading started successfully!",
+          "success"
+        );
+
+
+        button.textContent =
+          "Copy Trade Started";
+
+
+        setTimeout(function() {
+
+          window.location.href =
+            "dashboard.html";
+
+        }, 1200);
+
+
+      } catch (error) {
+
+        console.error(
+          "COPY TRADE ERROR:",
+          error
+        );
+
+        showMessage(
+          error.message,
+          "error"
+        );
+
+        button.disabled = false;
+
+        button.textContent =
+          "Start Copy Trading";
+
+      }
+
+    }
+  );
+
+
+// ------------------------------------------------------
+// START
+// ------------------------------------------------------
+
+async function init() {
+
+  try {
+
+    await loadBalance();
+
+    await loadTrader();
+
+  } catch (error) {
+
+    console.error(
+      "COPY TRADE PAGE ERROR:",
+      error
+    );
+
+    showMessage(
+      error.message ||
+      "Unable to load copy trading page.",
+      "error"
+    );
+
+  }
+
+}
+
+init();
+
+</script>
+
+</body>
+</html>

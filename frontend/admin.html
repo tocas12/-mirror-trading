@@ -1,0 +1,1778 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Admin Control | Mirror Trading</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #07111f;
+    color: white;
+    min-height: 100vh;
+}
+
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 240px;
+    height: 100vh;
+    background: #0b1728;
+    border-right: 1px solid #1e334d;
+    padding: 25px 15px;
+    overflow-y: auto;
+}
+
+.logo {
+    font-size: 23px;
+    font-weight: bold;
+    padding: 0 15px 30px;
+}
+
+.logo span {
+    color: #22c55e;
+}
+
+.admin-label {
+    margin: 0 15px 20px;
+    padding: 7px 10px;
+    display: inline-block;
+    border-radius: 20px;
+    background: rgba(34,197,94,.12);
+    color: #22c55e;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.menu a {
+    display: block;
+    padding: 13px 15px;
+    margin-bottom: 6px;
+    color: #94a3b8;
+    text-decoration: none;
+    border-radius: 8px;
+}
+
+.menu a:hover,
+.menu a.active {
+    background: #13243a;
+    color: #22c55e;
+}
+
+.logout {
+    color: #f87171 !important;
+    margin-top: 15px;
+}
+
+.main {
+    margin-left: 240px;
+    padding: 35px;
+}
+
+.header {
+    margin-bottom: 30px;
+}
+
+.header h1 {
+    font-size: 30px;
+    margin-bottom: 7px;
+}
+
+.subtitle {
+    color: #94a3b8;
+}
+
+.admin-user {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: #13243a;
+    color: #cbd5e1;
+    font-size: 13px;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-bottom: 25px;
+}
+
+.stat {
+    background: #0d1b2d;
+    border: 1px solid #1e334d;
+    border-radius: 14px;
+    padding: 20px;
+}
+
+.stat-label {
+    color: #94a3b8;
+    font-size: 13px;
+    margin-bottom: 10px;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #22c55e;
+}
+
+.section {
+    background: #0d1b2d;
+    border: 1px solid #1e334d;
+    border-radius: 14px;
+    padding: 22px;
+    margin-bottom: 20px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.section-header h2 {
+    font-size: 19px;
+}
+
+.refresh {
+    border: 1px solid #334155;
+    background: #13243a;
+    color: #cbd5e1;
+    padding: 8px 12px;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+.refresh:hover {
+    border-color: #22c55e;
+    color: #22c55e;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 12px 9px;
+    text-align: left;
+    border-bottom: 1px solid #1e334d;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+th {
+    color: #64748b;
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
+td {
+    color: #cbd5e1;
+    font-size: 13px;
+}
+
+.input {
+    width: 110px;
+    padding: 8px;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    background: #07111f;
+    color: white;
+    outline: none;
+}
+
+.input:focus {
+    border-color: #22c55e;
+}
+
+.select {
+    width: 100px;
+    padding: 8px;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    background: #07111f;
+    color: white;
+    outline: none;
+}
+
+.btn {
+    padding: 8px 10px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-right: 5px;
+    margin-bottom: 4px;
+}
+
+.btn-save {
+    background: #22c55e;
+    color: #04100a;
+}
+
+.btn-toggle {
+    background: #334155;
+    color: white;
+}
+
+.btn-stop {
+    background: #ef4444;
+    color: white;
+}
+
+.btn:hover {
+    opacity: 0.85;
+}
+
+.badge {
+    display: inline-block;
+    padding: 5px 8px;
+    border-radius: 15px;
+    font-size: 11px;
+}
+
+.badge-admin,
+.badge-active {
+    background: rgba(34,197,94,.12);
+    color: #22c55e;
+}
+
+.badge-user {
+    background: #13243a;
+    color: #94a3b8;
+}
+
+.badge-stopped {
+    background: rgba(239,68,68,.12);
+    color: #fca5a5;
+}
+
+.message {
+    display: none;
+    padding: 13px;
+    border-radius: 8px;
+    margin-bottom: 18px;
+}
+
+.message.success {
+    display: block;
+    background: rgba(34,197,94,.12);
+    border: 1px solid #22c55e;
+    color: #86efac;
+}
+
+.message.error {
+    display: block;
+    background: rgba(239,68,68,.12);
+    border: 1px solid #ef4444;
+    color: #fca5a5;
+}
+
+.loading,
+.empty,
+.error-box {
+    text-align: center;
+    padding: 35px;
+    color: #94a3b8;
+}
+
+.error-box {
+    color: #fca5a5;
+}
+
+.small-note {
+    color: #64748b;
+    font-size: 11px;
+    margin-top: 6px;
+}
+
+@media (max-width: 1200px) {
+    .stats {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 800px) {
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+    }
+
+    .main {
+        margin-left: 0;
+        padding: 20px;
+    }
+
+    .stats {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 520px) {
+    .stats {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<aside class="sidebar">
+
+    <div class="logo">
+        Mirror<span>Trading</span>
+    </div>
+
+    <div class="admin-label">
+        ADMIN CONTROL
+    </div>
+
+    <nav class="menu">
+
+        <a href="admin.html" class="active">
+            Admin Dashboard
+        </a>
+
+        <a href="dashboard.html">
+            User Dashboard
+        </a>
+
+        <a href="traders.html">
+            Traders
+        </a>
+
+        <a href="portfolio.html">
+            Portfolio
+        </a>
+
+        <a href="transactions.html">
+            Transactions
+        </a>
+
+        <a href="notifications.html">
+            Notifications
+        </a>
+
+        <a href="index.html" class="logout" onclick="logout()">
+            Log Out
+        </a>
+
+    </nav>
+
+</aside>
+
+
+<main class="main">
+
+    <div class="header">
+
+        <h1>Admin Control Dashboard</h1>
+
+        <p class="subtitle">
+            Manage your Mirror Trading demo application.
+        </p>
+
+        <div class="admin-user" id="adminUser">
+            Checking admin account...
+        </div>
+
+    </div>
+
+
+    <div id="message" class="message"></div>
+
+
+    <section class="stats">
+
+        <div class="stat">
+            <div class="stat-label">Total Users</div>
+            <div class="stat-value" id="usersCount">—</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-label">Total Balances</div>
+            <div class="stat-value" id="balances">—</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-label">Active Traders</div>
+            <div class="stat-value" id="tradersCount">—</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-label">Transactions</div>
+            <div class="stat-value" id="transactionsCount">—</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-label">Active Copy Trades</div>
+            <div class="stat-value" id="copyTradesCount">—</div>
+        </div>
+
+    </section>
+
+
+    <!-- USERS -->
+
+    <section class="section">
+
+        <div class="section-header">
+
+            <div>
+                <h2>Users</h2>
+
+                <div class="small-note">
+                    Change demo account balances.
+                </div>
+            </div>
+
+            <button
+                class="refresh"
+                type="button"
+                onclick="loadUsers()"
+            >
+                Refresh
+            </button>
+
+        </div>
+
+        <div
+            class="table-wrap"
+            id="usersContainer"
+        >
+            <div class="loading">
+                Loading users...
+            </div>
+        </div>
+
+    </section>
+
+
+    <!-- TRADERS -->
+
+    <section class="section">
+
+        <div class="section-header">
+
+            <div>
+                <h2>Trader Management</h2>
+
+                <div class="small-note">
+                    Edit demo trader performance and status.
+                </div>
+            </div>
+
+            <button
+                class="refresh"
+                type="button"
+                onclick="loadTraders()"
+            >
+                Refresh
+            </button>
+
+        </div>
+
+        <div
+            class="table-wrap"
+            id="tradersContainer"
+        >
+            <div class="loading">
+                Loading traders...
+            </div>
+        </div>
+
+    </section>
+
+
+    <!-- COPY TRADES -->
+
+    <section class="section">
+
+        <div class="section-header">
+
+            <div>
+                <h2>Copy-Trading Management</h2>
+
+                <div class="small-note">
+                    View and stop active demo copy trades.
+                </div>
+            </div>
+
+            <button
+                class="refresh"
+                type="button"
+                onclick="loadCopyTrades()"
+            >
+                Refresh
+            </button>
+
+        </div>
+
+        <div
+            class="table-wrap"
+            id="copyTradesContainer"
+        >
+            <div class="loading">
+                Loading copy trades...
+            </div>
+        </div>
+
+    </section>
+
+
+    <!-- TRANSACTIONS -->
+
+    <section class="section">
+
+        <div class="section-header">
+
+            <div>
+                <h2>Transaction Management</h2>
+
+                <div class="small-note">
+                    View demo account transactions.
+                </div>
+            </div>
+
+            <button
+                class="refresh"
+                type="button"
+                onclick="loadTransactions()"
+            >
+                Refresh
+            </button>
+
+        </div>
+
+        <div
+            class="table-wrap"
+            id="transactionsContainer"
+        >
+            <div class="loading">
+                Loading transactions...
+            </div>
+        </div>
+
+    </section>
+
+</main>
+
+
+<script>
+
+const API_URL = "http://localhost:5000";
+
+const token = localStorage.getItem("token");
+
+
+// ======================================================
+// LOGOUT / AUTH REDIRECT
+// ======================================================
+
+function logout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+}
+
+function goToLogin() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "login.html";
+}
+
+if (!token) {
+    goToLogin();
+}
+
+
+// ======================================================
+// API REQUEST
+// ======================================================
+
+async function apiRequest(path, options = {}) {
+
+    const response = await fetch(
+        API_URL + path,
+        {
+            ...options,
+
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+                ...(options.headers || {})
+            }
+        }
+    );
+
+    let data = {};
+
+    try {
+        data = await response.json();
+    } catch {
+        data = {};
+    }
+
+    if (response.status === 401) {
+        goToLogin();
+        return null;
+    }
+
+    if (response.status === 403) {
+        throw new Error("Admin access required.");
+    }
+
+    if (!response.ok) {
+        throw new Error(
+            data.message || "Request failed"
+        );
+    }
+
+    return data;
+}
+
+
+// ======================================================
+// VERIFY CURRENT USER
+// ======================================================
+
+async function verifyAdmin() {
+
+    try {
+
+        const data = await apiRequest(
+            "/api/auth/me"
+        );
+
+        if (!data) {
+            return false;
+        }
+
+        const user =
+            data.user || data;
+
+        if (!user || user.role !== "admin") {
+
+            document.getElementById(
+                "adminUser"
+            ).textContent =
+                "Admin access required.";
+
+            document.getElementById(
+                "usersContainer"
+            ).innerHTML = `
+                <div class="error-box">
+                    Your current account is not recognized as an administrator.
+                    Log out and log in again with your admin account.
+                </div>
+            `;
+
+            document.getElementById(
+                "tradersContainer"
+            ).innerHTML = "";
+
+            document.getElementById(
+                "copyTradesContainer"
+            ).innerHTML = "";
+
+            document.getElementById(
+                "transactionsContainer"
+            ).innerHTML = "";
+
+            return false;
+        }
+
+        document.getElementById(
+            "adminUser"
+        ).textContent =
+            "Signed in as: " +
+            (user.name || user.email) +
+            " • Administrator";
+
+        return true;
+
+    } catch (error) {
+
+        console.error(
+            "ADMIN AUTH CHECK ERROR:",
+            error
+        );
+
+        document.getElementById(
+            "adminUser"
+        ).textContent =
+            error.message;
+
+        return false;
+    }
+}
+
+
+// ======================================================
+// MONEY
+// ======================================================
+
+function money(value) {
+
+    return new Intl.NumberFormat(
+        "en-US",
+        {
+            style: "currency",
+            currency: "USD"
+        }
+    ).format(Number(value) || 0);
+
+}
+
+
+// ======================================================
+// ESCAPE HTML
+// ======================================================
+
+function escapeHtml(value) {
+
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+// ======================================================
+// MESSAGE
+// ======================================================
+
+function showMessage(text, type) {
+
+    const box =
+        document.getElementById("message");
+
+    box.textContent = text;
+
+    box.className =
+        "message " + type;
+
+    setTimeout(() => {
+
+        box.className = "message";
+        box.textContent = "";
+
+    }, 3500);
+
+}
+
+
+// ======================================================
+// SUMMARY
+// ======================================================
+
+async function loadSummary() {
+
+    try {
+
+        const data = await apiRequest(
+            "/api/admin/summary"
+        );
+
+        if (!data) {
+            return;
+        }
+
+        document.getElementById(
+            "usersCount"
+        ).textContent =
+            data.users ?? 0;
+
+        document.getElementById(
+            "balances"
+        ).textContent =
+            money(data.totalBalances);
+
+        document.getElementById(
+            "tradersCount"
+        ).textContent =
+            data.activeTraders ?? 0;
+
+        document.getElementById(
+            "transactionsCount"
+        ).textContent =
+            data.transactions ?? 0;
+
+        document.getElementById(
+            "copyTradesCount"
+        ).textContent =
+            data.activeCopyTrades ?? 0;
+
+    } catch (error) {
+
+        console.error(
+            "SUMMARY ERROR:",
+            error
+        );
+
+        showMessage(
+            error.message,
+            "error"
+        );
+    }
+}
+
+
+// ======================================================
+// USERS
+// ======================================================
+
+async function loadUsers() {
+
+    const container =
+        document.getElementById(
+            "usersContainer"
+        );
+
+    container.innerHTML =
+        '<div class="loading">Loading users...</div>';
+
+    try {
+
+        const data = await apiRequest(
+            "/api/admin/users"
+        );
+
+        if (!data) {
+            return;
+        }
+
+        const users =
+            data.users || [];
+
+        if (users.length === 0) {
+
+            container.innerHTML =
+                '<div class="empty">No users found.</div>';
+
+            return;
+        }
+
+        let html = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Current Balance</th>
+                        <th>New Balance</th>
+                        <th>Role</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        users.forEach(user => {
+
+            const roleClass =
+                user.role === "admin"
+                    ? "badge-admin"
+                    : "badge-user";
+
+            html += `
+                <tr>
+
+                    <td>
+                        ${escapeHtml(user.name)}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(user.email)}
+                    </td>
+
+                    <td>
+                        ${money(user.balance)}
+                    </td>
+
+                    <td>
+                        <input
+                            class="input"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            id="balance-${user._id}"
+                            value="${Number(user.balance || 0)}"
+                        >
+                    </td>
+
+                    <td>
+                        <span class="badge ${roleClass}">
+                            ${escapeHtml(
+                                user.role || "user"
+                            )}
+                        </span>
+                    </td>
+
+                    <td>
+                        <button
+                            class="btn btn-save"
+                            type="button"
+                            onclick="updateBalance('${user._id}')"
+                        >
+                            Save
+                        </button>
+                    </td>
+
+                </tr>
+            `;
+        });
+
+        html += `
+                </tbody>
+            </table>
+        `;
+
+        container.innerHTML = html;
+
+    } catch (error) {
+
+        console.error(
+            "USERS ERROR:",
+            error
+        );
+
+        container.innerHTML = `
+            <div class="error-box">
+                ${escapeHtml(error.message)}
+            </div>
+        `;
+    }
+}
+
+
+// ======================================================
+// UPDATE BALANCE
+// ======================================================
+
+async function updateBalance(userId) {
+
+    const input =
+        document.getElementById(
+            "balance-" + userId
+        );
+
+    const balance =
+        Number(input.value);
+
+    if (!Number.isFinite(balance) || balance < 0) {
+
+        showMessage(
+            "Enter a valid balance.",
+            "error"
+        );
+
+        return;
+    }
+
+    try {
+
+        const data =
+            await apiRequest(
+                `/api/admin/users/${userId}/balance`,
+                {
+                    method: "PATCH",
+
+                    body: JSON.stringify({
+                        balance
+                    })
+                }
+            );
+
+        if (!data) {
+            return;
+        }
+
+        showMessage(
+            "User balance updated successfully.",
+            "success"
+        );
+
+        await loadSummary();
+        await loadUsers();
+
+    } catch (error) {
+
+        console.error(
+            "BALANCE ERROR:",
+            error
+        );
+
+        showMessage(
+            error.message,
+            "error"
+        );
+    }
+}
+
+
+// ======================================================
+// TRADERS
+// ======================================================
+
+async function loadTraders() {
+
+    const container =
+        document.getElementById(
+            "tradersContainer"
+        );
+
+    container.innerHTML =
+        '<div class="loading">Loading traders...</div>';
+
+    try {
+
+        const data =
+            await apiRequest(
+                "/api/admin/traders"
+            );
+
+        if (!data) {
+            return;
+        }
+
+        const traders =
+            data.traders || [];
+
+        if (traders.length === 0) {
+
+            container.innerHTML =
+                '<div class="empty">No traders found.</div>';
+
+            return;
+        }
+
+        let html = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Username</th>
+                        <th>Profit %</th>
+                        <th>Win Rate</th>
+                        <th>Risk</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        traders.forEach(trader => {
+
+            html += `
+                <tr>
+
+                    <td>
+                        <input
+                            class="input"
+                            type="text"
+                            id="name-${trader._id}"
+                            value="${escapeHtml(
+                                trader.name || ""
+                            )}"
+                        >
+                    </td>
+
+                    <td>
+                        <input
+                            class="input"
+                            type="text"
+                            id="username-${trader._id}"
+                            value="${escapeHtml(
+                                trader.username || ""
+                            )}"
+                        >
+                    </td>
+
+                    <td>
+                        <input
+                            class="input"
+                            type="number"
+                            step="0.1"
+                            id="profit-${trader._id}"
+                            value="${Number(
+                                trader.profitPercentage || 0
+                            )}"
+                        >
+                    </td>
+
+                    <td>
+                        <input
+                            class="input"
+                            type="number"
+                            min="0"
+                            max="100"
+                            step="0.1"
+                            id="winRate-${trader._id}"
+                            value="${Number(
+                                trader.winRate || 0
+                            )}"
+                        >
+                    </td>
+
+                    <td>
+                        <select
+                            class="select"
+                            id="risk-${trader._id}"
+                        >
+                            <option value="Low"
+                                ${trader.riskLevel === "Low" ? "selected" : ""}>
+                                Low
+                            </option>
+
+                            <option value="Medium"
+                                ${trader.riskLevel === "Medium" ? "selected" : ""}>
+                                Medium
+                            </option>
+
+                            <option value="High"
+                                ${trader.riskLevel === "High" ? "selected" : ""}>
+                                High
+                            </option>
+                        </select>
+                    </td>
+
+                    <td>
+                        <span class="badge ${
+                            trader.isActive
+                                ? "badge-active"
+                                : "badge-stopped"
+                        }">
+                            ${
+                                trader.isActive
+                                    ? "Active"
+                                    : "Inactive"
+                            }
+                        </span>
+                    </td>
+
+                    <td>
+
+                        <button
+                            class="btn btn-save"
+                            type="button"
+                            onclick="updateTrader('${trader._id}')"
+                        >
+                            Save
+                        </button>
+
+                        <button
+                            class="btn btn-toggle"
+                            type="button"
+                            onclick="toggleTrader(
+                                '${trader._id}',
+                                ${!trader.isActive}
+                            )"
+                        >
+                            ${
+                                trader.isActive
+                                    ? "Deactivate"
+                                    : "Activate"
+                            }
+                        </button>
+
+                    </td>
+
+                </tr>
+            `;
+        });
+
+        html += `
+                </tbody>
+            </table>
+        `;
+
+        container.innerHTML = html;
+
+    } catch (error) {
+
+        console.error(
+            "TRADERS ERROR:",
+            error
+        );
+
+        container.innerHTML = `
+            <div class="error-box">
+                ${escapeHtml(error.message)}
+            </div>
+        `;
+    }
+}
+
+
+// ======================================================
+// UPDATE TRADER
+// ======================================================
+
+async function updateTrader(traderId) {
+
+    const name =
+        document.getElementById(
+            `name-${traderId}`
+        ).value.trim();
+
+    const username =
+        document.getElementById(
+            `username-${traderId}`
+        ).value.trim();
+
+    const profitPercentage =
+        Number(
+            document.getElementById(
+                `profit-${traderId}`
+            ).value
+        );
+
+    const winRate =
+        Number(
+            document.getElementById(
+                `winRate-${traderId}`
+            ).value
+        );
+
+    const riskLevel =
+        document.getElementById(
+            `risk-${traderId}`
+        ).value;
+
+    if (!name || !username) {
+
+        showMessage(
+            "Name and username are required.",
+            "error"
+        );
+
+        return;
+    }
+
+    if (
+        !Number.isFinite(profitPercentage) ||
+        !Number.isFinite(winRate)
+    ) {
+
+        showMessage(
+            "Enter valid profit and win rate values.",
+            "error"
+        );
+
+        return;
+    }
+
+    if (winRate < 0 || winRate > 100) {
+
+        showMessage(
+            "Win rate must be between 0 and 100.",
+            "error"
+        );
+
+        return;
+    }
+
+    try {
+
+        const data =
+            await apiRequest(
+                `/api/admin/traders/${traderId}`,
+                {
+                    method: "PATCH",
+
+                    body: JSON.stringify({
+                        name,
+                        username,
+                        profitPercentage,
+                        winRate,
+                        riskLevel
+                    })
+                }
+            );
+
+        if (!data) {
+            return;
+        }
+
+        showMessage(
+            "Trader updated successfully.",
+            "success"
+        );
+
+        await loadSummary();
+        await loadTraders();
+
+    } catch (error) {
+
+        console.error(
+            "TRADER ERROR:",
+            error
+        );
+
+        showMessage(
+            error.message,
+            "error"
+        );
+    }
+}
+
+
+// ======================================================
+// TOGGLE TRADER
+// ======================================================
+
+async function toggleTrader(
+    traderId,
+    isActive
+) {
+
+    const action =
+        isActive
+            ? "activate"
+            : "deactivate";
+
+    if (
+        !confirm(
+            `Are you sure you want to ${action} this trader?`
+        )
+    ) {
+        return;
+    }
+
+    try {
+
+        const data =
+            await apiRequest(
+                `/api/admin/traders/${traderId}/status`,
+                {
+                    method: "PATCH",
+
+                    body: JSON.stringify({
+                        isActive
+                    })
+                }
+            );
+
+        if (!data) {
+            return;
+        }
+
+        showMessage(
+            data.message,
+            "success"
+        );
+
+        await loadSummary();
+        await loadTraders();
+
+    } catch (error) {
+
+        console.error(
+            "TRADER STATUS ERROR:",
+            error
+        );
+
+        showMessage(
+            error.message,
+            "error"
+        );
+    }
+}
+
+
+// ======================================================
+// COPY TRADES
+// ======================================================
+
+async function loadCopyTrades() {
+
+    const container =
+        document.getElementById(
+            "copyTradesContainer"
+        );
+
+    container.innerHTML =
+        '<div class="loading">Loading copy trades...</div>';
+
+    try {
+
+        const data =
+            await apiRequest(
+                "/api/admin/copy-trades"
+            );
+
+        if (!data) {
+            return;
+        }
+
+        const copyTrades =
+            data.copyTrades || [];
+
+        if (copyTrades.length === 0) {
+
+            container.innerHTML =
+                '<div class="empty">No copy trades found.</div>';
+
+            return;
+        }
+
+        let html = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Trader</th>
+                        <th>Amount</th>
+                        <th>Profit / Loss</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        copyTrades.forEach(copy => {
+
+            const user =
+                copy.user || {};
+
+            const trader =
+                copy.trader || {};
+
+            const profitLoss =
+                Number(copy.profitLoss || 0);
+
+            html += `
+                <tr>
+
+                    <td>
+                        ${escapeHtml(
+                            user.email ||
+                            user.name ||
+                            "Unknown"
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            trader.name ||
+                            "Unknown"
+                        )}
+                    </td>
+
+                    <td>
+                        ${money(copy.amount)}
+                    </td>
+
+                    <td>
+                        ${money(profitLoss)}
+                    </td>
+
+                    <td>
+                        <span class="badge ${
+                            copy.status === "active"
+                                ? "badge-active"
+                                : "badge-stopped"
+                        }">
+                            ${escapeHtml(
+                                copy.status ||
+                                "unknown"
+                            )}
+                        </span>
+                    </td>
+
+                    <td>
+                        ${
+                            copy.createdAt
+                                ? new Date(
+                                    copy.createdAt
+                                  ).toLocaleDateString()
+                                : "—"
+                        }
+                    </td>
+
+                    <td>
+                        ${
+                            copy.status === "active"
+                                ? `
+                                    <button
+                                        class="btn btn-stop"
+                                        type="button"
+                                        onclick="stopCopyTrade('${copy._id}')"
+                                    >
+                                        Stop
+                                    </button>
+                                  `
+                                : `
+                                    <span class="small-note">
+                                        Already stopped
+                                    </span>
+                                  `
+                        }
+                    </td>
+
+                </tr>
+            `;
+        });
+
+        html += `
+                </tbody>
+            </table>
+        `;
+
+        container.innerHTML = html;
+
+    } catch (error) {
+
+        console.error(
+            "COPY TRADES ERROR:",
+            error
+        );
+
+        container.innerHTML = `
+            <div class="error-box">
+                ${escapeHtml(error.message)}
+            </div>
+        `;
+    }
+}
+
+
+// ======================================================
+// STOP COPY TRADE
+// ======================================================
+
+async function stopCopyTrade(copyId) {
+
+    if (
+        !confirm(
+            "Stop this copy trade and return its allocated demo funds to the user?"
+        )
+    ) {
+        return;
+    }
+
+    try {
+
+        const data =
+            await apiRequest(
+                `/api/admin/copy-trades/${copyId}/stop`,
+                {
+                    method: "PATCH"
+                }
+            );
+
+        if (!data) {
+            return;
+        }
+
+        showMessage(
+            "Copy trade stopped successfully. " +
+            money(data.returnedAmount) +
+            " returned to the user's balance.",
+            "success"
+        );
+
+        await loadSummary();
+        await loadCopyTrades();
+        await loadUsers();
+
+    } catch (error) {
+
+        console.error(
+            "STOP COPY ERROR:",
+            error
+        );
+
+        showMessage(
+            error.message,
+            "error"
+        );
+    }
+}
+
+
+// ======================================================
+// TRANSACTIONS
+// ======================================================
+
+async function loadTransactions() {
+
+    const container =
+        document.getElementById(
+            "transactionsContainer"
+        );
+
+    container.innerHTML =
+        '<div class="loading">Loading transactions...</div>';
+
+    try {
+
+        const data =
+            await apiRequest(
+                "/api/admin/transactions"
+            );
+
+        if (!data) {
+            return;
+        }
+
+        const transactions =
+            data.transactions || [];
+
+        if (transactions.length === 0) {
+
+            container.innerHTML =
+                '<div class="empty">No transactions found.</div>';
+
+            return;
+        }
+
+        let html = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        transactions.forEach(transaction => {
+
+            const user =
+                transaction.user || {};
+
+            html += `
+                <tr>
+
+                    <td>
+                        ${escapeHtml(
+                            user.email ||
+                            user.name ||
+                            "Unknown"
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            transaction.type ||
+                            "Unknown"
+                        )}
+                    </td>
+
+                    <td>
+                        ${money(
+                            transaction.amount
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            transaction.description ||
+                            "—"
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            transaction.status ||
+                            "Unknown"
+                        )}
+                    </td>
+
+                    <td>
+                        ${
+                            transaction.createdAt
+                                ? new Date(
+                                    transaction.createdAt
+                                  ).toLocaleString()
+                                : "—"
+                        }
+                    </td>
+
+                </tr>
+            `;
+        });
+
+        html += `
+                </tbody>
+            </table>
+        `;
+
+        container.innerHTML = html;
+
+    } catch (error) {
+
+        console.error(
+            "TRANSACTIONS ERROR:",
+            error
+        );
+
+        container.innerHTML = `
+            <div class="error-box">
+                ${escapeHtml(error.message)}
+            </div>
+        `;
+    }
+}
+
+
+// ======================================================
+// START
+// ======================================================
+
+async function init() {
+
+    const isAdmin =
+        await verifyAdmin();
+
+    if (!isAdmin) {
+        return;
+    }
+
+    await loadSummary();
+    await loadUsers();
+    await loadTraders();
+    await loadCopyTrades();
+    await loadTransactions();
+}
+
+init();
+
+</script>
+
+</body>
+</html>
+```

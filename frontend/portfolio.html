@@ -1,0 +1,586 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Portfolio | Mirror Trading</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #07111f;
+    color: white;
+    min-height: 100vh;
+}
+
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 240px;
+    height: 100vh;
+    background: #0b1728;
+    border-right: 1px solid #1e334d;
+    padding: 25px 15px;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    padding: 0 15px 35px;
+}
+
+.logo span {
+    color: #22c55e;
+}
+
+.menu a {
+    display: block;
+    padding: 13px 15px;
+    margin-bottom: 6px;
+    color: #94a3b8;
+    text-decoration: none;
+    border-radius: 8px;
+}
+
+.menu a:hover,
+.menu a.active {
+    background: #13243a;
+    color: #22c55e;
+}
+
+.logout {
+    color: #f87171 !important;
+}
+
+.main {
+    margin-left: 240px;
+    padding: 30px;
+}
+
+.topbar {
+    margin-bottom: 25px;
+}
+
+h1 {
+    font-size: 30px;
+    margin-bottom: 6px;
+}
+
+.subtitle {
+    color: #94a3b8;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.card {
+    background: #0d1b2d;
+    border: 1px solid #1e334d;
+    border-radius: 14px;
+    padding: 22px;
+}
+
+.card p {
+    color: #94a3b8;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+.amount {
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.green {
+    color: #22c55e;
+}
+
+.red {
+    color: #ef4444;
+}
+
+.section {
+    background: #0d1b2d;
+    border: 1px solid #1e334d;
+    border-radius: 14px;
+    padding: 22px;
+}
+
+.section h2 {
+    font-size: 19px;
+    margin-bottom: 18px;
+}
+
+.copy {
+    padding: 18px 0;
+    border-bottom: 1px solid #1e334d;
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.copy:last-child {
+    border-bottom: none;
+}
+
+.trader-name {
+    font-weight: bold;
+    font-size: 17px;
+}
+
+.trader-info {
+    color: #94a3b8;
+    font-size: 13px;
+    margin-top: 6px;
+}
+
+.copy-right {
+    text-align: right;
+}
+
+.copy-amount {
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+.profit {
+    color: #22c55e;
+    font-weight: bold;
+}
+
+.loss {
+    color: #ef4444;
+    font-weight: bold;
+}
+
+.empty,
+.loading,
+.error {
+    padding: 35px 10px;
+    text-align: center;
+    color: #94a3b8;
+}
+
+.error {
+    color: #fca5a5;
+}
+
+@media (max-width: 900px) {
+    .cards {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 700px) {
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+    }
+
+    .main {
+        margin-left: 0;
+        padding: 20px;
+    }
+
+    .copy {
+        flex-direction: column;
+    }
+
+    .copy-right {
+        text-align: left;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<aside class="sidebar">
+
+    <div class="logo">
+        Mirror<span>Trading</span>
+    </div>
+
+    <nav class="menu">
+
+        <a href="dashboard.html">Dashboard</a>
+
+        <a href="traders.html">Top Traders</a>
+
+        <a href="copy-trade.html">Copy Trading</a>
+
+        <a href="deposit.html">Deposit</a>
+
+        <a href="withdrawal.html">Withdrawal</a>
+
+        <a href="transfer.html">Transfer</a>
+
+        <a href="portfolio.html" class="active">Portfolio</a>
+
+        <a href="transactions.html">Transactions</a>
+
+        <a href="notifications.html">Notifications</a>
+
+        <a href="index.html" class="logout" onclick="logout()">
+            Log Out
+        </a>
+
+    </nav>
+
+</aside>
+
+
+<main class="main">
+
+    <div class="topbar">
+
+        <h1>Portfolio</h1>
+
+        <p class="subtitle">
+            View your active copy-trading investments and performance.
+        </p>
+
+    </div>
+
+
+    <section class="cards">
+
+        <div class="card">
+
+            <p>Total Invested</p>
+
+            <div class="amount" id="totalInvested">
+                Loading...
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <p>Profit / Loss</p>
+
+            <div class="amount" id="profitLoss">
+                Loading...
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <p>Portfolio Value</p>
+
+            <div class="amount" id="portfolioValue">
+                Loading...
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <section class="section">
+
+        <h2>Active Copy Trades</h2>
+
+        <div id="copies">
+
+            <div class="loading">
+                Loading portfolio...
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<script>
+
+const API_URL = "http://localhost:5000";
+
+const token = localStorage.getItem("token");
+
+
+if (!token) {
+
+    window.location.href = "login.html";
+
+}
+
+
+// ======================================================
+// MONEY
+// ======================================================
+
+function money(value) {
+
+    return new Intl.NumberFormat("en-US", {
+
+        style: "currency",
+
+        currency: "USD"
+
+    }).format(Number(value) || 0);
+
+}
+
+
+// ======================================================
+// LOGOUT
+// ======================================================
+
+function logout() {
+
+    localStorage.removeItem("token");
+
+    localStorage.removeItem("user");
+
+}
+
+
+// ======================================================
+// LOAD PORTFOLIO
+// ======================================================
+
+async function loadPortfolio() {
+
+    const container =
+        document.getElementById("copies");
+
+    try {
+
+        const response = await fetch(
+
+            `${API_URL}/api/portfolio`,
+
+            {
+
+                method: "GET",
+
+                headers: {
+
+                    "Authorization": `Bearer ${token}`
+
+                }
+
+            }
+
+        );
+
+
+        const data = await response.json();
+
+
+        console.log("PORTFOLIO:", data);
+
+
+        if (response.status === 401) {
+
+            localStorage.removeItem("token");
+
+            localStorage.removeItem("user");
+
+            window.location.href = "login.html";
+
+            return;
+
+        }
+
+
+        if (!response.ok) {
+
+            throw new Error(
+
+                data.message ||
+                "Unable to load portfolio"
+
+            );
+
+        }
+
+
+        const portfolio =
+            data.portfolio || {};
+
+
+        document.getElementById(
+            "totalInvested"
+        ).textContent =
+            money(portfolio.totalInvested);
+
+
+        document.getElementById(
+            "profitLoss"
+        ).textContent =
+            money(portfolio.totalProfitLoss);
+
+
+        document.getElementById(
+            "portfolioValue"
+        ).textContent =
+            money(portfolio.portfolioValue);
+
+
+        const copies =
+            data.activeCopyTrades || [];
+
+
+        container.innerHTML = "";
+
+
+        if (copies.length === 0) {
+
+            container.innerHTML = `
+
+                <div class="empty">
+
+                    You do not have any active copy trades yet.
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        copies.forEach(copy => {
+
+            const div =
+                document.createElement("div");
+
+
+            div.className = "copy";
+
+
+            const trader =
+                copy.trader || {};
+
+
+            const profitLoss =
+                Number(copy.profitLoss) || 0;
+
+
+            const profitClass =
+                profitLoss >= 0
+                ? "profit"
+                : "loss";
+
+
+            const profitSign =
+                profitLoss >= 0
+                ? "+"
+                : "";
+
+
+            div.innerHTML = `
+
+                <div>
+
+                    <div class="trader-name">
+
+                        ${trader.name || "Trader"}
+
+                    </div>
+
+                    <div class="trader-info">
+
+                        Invested:
+                        ${money(copy.amount)}
+
+                        <br>
+
+                        Performance:
+                        ${trader.profitPercentage ?? 0}%
+
+                        <br>
+
+                        Status:
+                        ${copy.status || "active"}
+
+                    </div>
+
+                </div>
+
+
+                <div class="copy-right">
+
+                    <div class="copy-amount">
+
+                        ${money(copy.amount)}
+
+                    </div>
+
+
+                    <div class="${profitClass}">
+
+                        ${profitSign}${money(profitLoss)}
+
+                    </div>
+
+                </div>
+
+            `;
+
+
+            container.appendChild(div);
+
+        });
+
+
+    } catch (error) {
+
+        console.error(
+            "PORTFOLIO ERROR:",
+            error
+        );
+
+
+        container.innerHTML = `
+
+            <div class="error">
+
+                Unable to load portfolio.
+
+                <br><br>
+
+                ${error.message}
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+// ======================================================
+// START
+// ======================================================
+
+loadPortfolio();
+
+</script>
+
+</body>
+</html>
+```

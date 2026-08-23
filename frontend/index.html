@@ -1,0 +1,210 @@
+DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+ <title>Mirror Trading</title>
+
+ <style>
+ * {
+ box-sizing: border-box;
+ margin: 0;
+ padding: 0;
+ }
+
+ body {
+ font-family: Arial, sans-serif;
+ background: #07111f;
+ color: white;
+ }
+
+ header {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ padding: 20px 7%;
+ border-bottom: 1px solid #17263a;
+ }
+
+ .logo {
+ font-size: 24px;
+ font-weight: bold;
+ }
+
+ .logo span {
+ color: #22c55e;
+ }
+
+ nav a {
+ color: #cbd5e1;
+ text-decoration: none;
+ margin-left: 25px;
+ }
+
+ nav a:hover {
+ color: #22c55e;
+ }
+
+ .hero {
+ min-height: 80vh;
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ gap: 40px;
+ padding: 70px 7%;
+ }
+
+ .hero-text {
+ max-width: 600px;
+ }
+
+ .hero h1 {
+ font-size: 58px;
+ line-height: 1.1;
+ margin-bottom: 20px;
+ }
+
+ .hero h1 span {
+ color: #22c55e;
+ }
+
+ .hero p {
+ color: #94a3b8;
+ font-size: 18px;
+ line-height: 1.7;
+ margin-bottom: 30px;
+ }
+
+ .buttons {
+ display: flex;
+ gap: 15px;
+ }
+
+ .btn {
+ padding: 14px 24px;
+ border-radius: 8px;
+ text-decoration: none;
+ font-weight: bold;
+ }
+
+ .primary {
+ background: #22c55e;
+ color: #04100a;
+ }
+
+ .secondary {
+ border: 1px solid #334155;
+ color: white;
+ }
+
+ .card {
+ width: 350px;
+ padding: 30px;
+ border-radius: 18px;
+ background: #0d1b2d;
+ border: 1px solid #1e334d;
+ box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+ }
+
+ .card h2 {
+ margin-bottom: 20px;
+ }
+
+ .stat {
+ display: flex;
+ justify-content: space-between;
+ padding: 15px 0;
+ border-bottom: 1px solid #1e334d;
+ }
+
+ .green {
+ color: #22c55e;
+ }
+
+ @media (max-width: 800px) {
+ .hero {
+ flex-direction: column;
+ text-align: center;
+ }
+
+ .hero h1 {
+ font-size: 42px;
+ }
+
+ .buttons {
+ justify-content: center;
+ }
+
+ nav {
+ display: none;
+ }
+
+ .card {
+ width: 100%;
+ max-width: 350px;
+ }
+ }
+ </style>
+</head>
+
+<body>
+
+ <header>
+ <div class="logo">Mirror<span>Trading</span></div>
+
+ <nav>
+ <a href="#">Home</a>
+ <a href="#">Traders</a>
+ <a href="#">Markets</a>
+ <a href="login.html">Login</a>
+ </nav>
+ </header>
+
+ <section class="hero">
+
+ <div class="hero-text">
+ <h1>
+ Trade smarter with
+ <span>Mirror Trading.</span>
+ </h1>
+
+ <p>
+ Discover experienced traders, follow their strategies,
+ and manage your trading portfolio from one professional dashboard.
+ </p>
+
+ <div class="buttons">
+ <a href="register.html" class="btn primary">create Account</a>
+ <a href="#" class="btn secondary">Explore Traders</a>
+ </div>
+ </div>
+
+ <div class="card">
+ <h2>Top Trader</h2>
+
+ <div class="stat">
+ <span>Trader</span>
+ <strong>Alex Carter</strong>
+ </div>
+
+ <div class="stat">
+ <span>Performance</span>
+ <strong class="green">+24.8%</strong>
+ </div>
+
+ <div class="stat">
+ <span>Followers</span>
+ <strong>2,481</strong>
+ </div>
+
+ <div class="stat">
+ <span>Risk Level</span>
+ <strong>Medium</strong>
+ </div>
+ </div>
+
+ </section>
+
+</body>
+</html>

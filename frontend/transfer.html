@@ -1,0 +1,413 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Transfer | Mirror Trading</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #07111f;
+    color: white;
+    min-height: 100vh;
+    padding: 30px 20px;
+}
+
+.container {
+    max-width: 650px;
+    margin: auto;
+}
+
+.card {
+    background: #0d1b2d;
+    border: 1px solid #1e334d;
+    border-radius: 16px;
+    padding: 30px;
+}
+
+.logo {
+    font-size: 25px;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+
+.logo span {
+    color: #22c55e;
+}
+
+h1 {
+    margin-bottom: 10px;
+}
+
+.description {
+    color: #94a3b8;
+    line-height: 1.6;
+    margin-bottom: 25px;
+}
+
+.balance {
+    background: #13243a;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 25px;
+    color: #94a3b8;
+}
+
+.balance strong {
+    color: white;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    color: #cbd5e1;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+input,
+select {
+    width: 100%;
+    padding: 14px;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    background: #07111f;
+    color: white;
+    outline: none;
+    font-size: 15px;
+}
+
+input:focus,
+select:focus {
+    border-color: #22c55e;
+}
+
+.notice {
+    background: #13243a;
+    color: #94a3b8;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+button {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    background: #22c55e;
+    color: #04100a;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #16a34a;
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.back {
+    display: inline-block;
+    margin-top: 20px;
+    color: #22c55e;
+    text-decoration: none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="card">
+
+<div class="logo">
+Mirror<span>Trading</span>
+</div>
+
+<h1>Transfer</h1>
+
+<p class="description">
+Transfer funds to another Mirror Trading demo account.
+</p>
+
+<div class="balance">
+Available balance:
+<strong id="balance">Loading...</strong>
+</div>
+
+<form id="transferForm">
+
+<div class="form-group">
+
+<label for="recipient">
+Recipient Email
+</label>
+
+<input
+    type="email"
+    id="recipient"
+    placeholder="Enter recipient email"
+    required
+>
+
+</div>
+
+<div class="form-group">
+
+<label for="amount">
+Amount
+</label>
+
+<input
+    type="number"
+    id="amount"
+    min="0.01"
+    step="0.01"
+    placeholder="Enter amount"
+    required
+>
+
+</div>
+
+<div class="notice">
+This is a demo transfer between Mirror Trading accounts.
+The backend will validate the recipient and available balance.
+</div>
+
+<button type="submit" id="transferButton">
+Transfer Funds
+</button>
+
+</form>
+
+<a class="back" href="dashboard.html">
+← Back to Dashboard
+</a>
+
+</div>
+
+</div>
+
+
+<script>
+
+const API_URL = "http://localhost:5000";
+
+const token = localStorage.getItem("token");
+
+
+if (!token) {
+
+    window.location.href = "login.html";
+
+}
+
+
+// ======================================================
+// LOAD BALANCE
+// ======================================================
+
+async function loadBalance() {
+
+    try {
+
+        const response = await fetch(
+            `${API_URL}/api/dashboard`,
+            {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            }
+        );
+
+        const data = await response.json();
+
+        if (response.status === 401) {
+
+            localStorage.removeItem("token");
+
+            window.location.href = "login.html";
+
+            return;
+        }
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message || "Unable to load balance"
+            );
+
+        }
+
+        document.getElementById("balance").textContent =
+            "$" + Number(data.balance).toFixed(2);
+
+    } catch (error) {
+
+        console.error("BALANCE ERROR:", error);
+
+        document.getElementById("balance").textContent =
+            "Unable to load";
+
+    }
+
+}
+
+
+// ======================================================
+// TRANSFER
+// ======================================================
+
+document
+.getElementById("transferForm")
+.addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    const recipient =
+        document.getElementById("recipient").value.trim();
+
+    const amount =
+        Number(document.getElementById("amount").value);
+
+    const button =
+        document.getElementById("transferButton");
+
+
+    if (!recipient) {
+
+        alert("Please enter the recipient email.");
+
+        return;
+
+    }
+
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+
+        alert("Please enter a valid amount.");
+
+        return;
+
+    }
+
+
+    button.disabled = true;
+
+    button.textContent = "Processing...";
+
+
+    try {
+
+        const response = await fetch(
+            `${API_URL}/api/wallet/transfer`,
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+
+                body: JSON.stringify({
+                    email: recipient,
+                    amount: amount
+                })
+            }
+        );
+
+
+        const data = await response.json();
+
+        console.log("TRANSFER RESPONSE:", data);
+
+
+        if (response.status === 401) {
+
+            localStorage.removeItem("token");
+
+            window.location.href = "login.html";
+
+            return;
+
+        }
+
+
+        if (!response.ok) {
+
+            alert(
+                data.message ||
+                "Transfer failed."
+            );
+
+            return;
+
+        }
+
+
+        alert(
+            "Transfer successful!\n\n" +
+            "Recipient: " +
+            data.recipient.name +
+            "\nAmount: $" +
+            Number(data.amount).toFixed(2) +
+            "\nNew Balance: $" +
+            Number(data.balance).toFixed(2)
+        );
+
+
+        document.getElementById("recipient").value = "";
+
+        document.getElementById("amount").value = "";
+
+        document.getElementById("balance").textContent =
+            "$" + Number(data.balance).toFixed(2);
+
+
+    } catch (error) {
+
+        console.error("TRANSFER ERROR:", error);
+
+        alert(
+            "Unable to connect to the backend.\n\n" +
+            "Make sure your Node.js server is running."
+        );
+
+    } finally {
+
+        button.disabled = false;
+
+        button.textContent = "Transfer Funds";
+
+    }
+
+});
+
+
+loadBalance();
+
+</script>
+
+</body>
+</html>

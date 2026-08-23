@@ -1,0 +1,679 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Top Traders | Mirror Trading</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #07111f;
+      color: white;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 240px;
+      height: 100vh;
+      background: #0b1728;
+      border-right: 1px solid #1e334d;
+      padding: 25px 15px;
+    }
+
+    .logo {
+      font-size: 23px;
+      font-weight: bold;
+      padding: 0 15px 35px;
+    }
+
+    .logo span {
+      color: #22c55e;
+    }
+
+    .menu a {
+      display: block;
+      padding: 14px 15px;
+      margin-bottom: 6px;
+      color: #94a3b8;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: 0.2s;
+    }
+
+    .menu a:hover,
+    .menu .active {
+      background: #13243a;
+      color: #22c55e;
+    }
+
+    .logout {
+      color: #f87171 !important;
+      margin-top: 15px;
+    }
+
+    .main {
+      margin-left: 240px;
+      padding: 35px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .topbar h1 {
+      font-size: 30px;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: #94a3b8;
+    }
+
+    .balance {
+      background: #0d1b2d;
+      border: 1px solid #1e334d;
+      padding: 12px 18px;
+      border-radius: 10px;
+    }
+
+    .balance span {
+      color: #94a3b8;
+      font-size: 13px;
+    }
+
+    .balance strong {
+      display: block;
+      margin-top: 5px;
+      font-size: 18px;
+      color: #22c55e;
+    }
+
+    .traders-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .trader-card {
+      background: #0d1b2d;
+      border: 1px solid #1e334d;
+      border-radius: 16px;
+      padding: 24px;
+      transition: 0.25s;
+    }
+
+    .trader-card:hover {
+      transform: translateY(-4px);
+      border-color: #22c55e;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, .25);
+    }
+
+    .trader-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: #13243a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #22c55e;
+      font-weight: bold;
+      font-size: 20px;
+    }
+
+    .status {
+      padding: 6px 10px;
+      border-radius: 20px;
+      background: rgba(34, 197, 94, .12);
+      color: #22c55e;
+      font-size: 12px;
+    }
+
+    .trader-name {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .username {
+      color: #64748b;
+      margin-top: 5px;
+      font-size: 14px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 22px 0;
+    }
+
+    .stat {
+      background: #07111f;
+      border-radius: 10px;
+      padding: 14px;
+    }
+
+    .stat-label {
+      color: #64748b;
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-size: 17px;
+      font-weight: bold;
+    }
+
+    .profit {
+      color: #22c55e;
+    }
+
+    .risk {
+      color: #facc15;
+    }
+
+    .copy-btn {
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 9px;
+      background: #22c55e;
+      color: #04100a;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    .copy-btn:hover {
+      background: #16a34a;
+    }
+
+    .loading,
+    .error,
+    .empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 50px;
+      color: #94a3b8;
+      background: #0d1b2d;
+      border: 1px solid #1e334d;
+      border-radius: 14px;
+    }
+
+    .error {
+      color: #fca5a5;
+    }
+
+    @media (max-width: 1000px) {
+      .traders-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 700px) {
+      .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+      }
+
+      .main {
+        margin-left: 0;
+        padding: 20px;
+      }
+
+      .traders-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+      }
+
+      .balance {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <aside class="sidebar">
+
+    <div class="logo">
+      Mirror<span>Trading</span>
+    </div>
+
+    <nav class="menu">
+
+      <a href="dashboard.html">
+        Dashboard
+      </a>
+
+      <a href="traders.html" class="active">
+        Top Traders
+      </a>
+
+      <a href="copy-trade.html">
+        Copy Trading
+      </a>
+
+      <a href="deposit.html">
+        Deposit
+      </a>
+
+      <a href="withdrawal.html">
+        Withdrawal
+      </a>
+
+      <a href="transfer.html">
+        Transfer
+      </a>
+
+      <a href="portfolio.html">
+        Portfolio
+      </a>
+
+      <a href="transactions.html">
+        Transactions
+      </a>
+
+      <a href="notifications.html">
+        Notifications
+      </a>
+
+      <a href="index.html" class="logout" onclick="logout()">
+        Log Out
+      </a>
+
+    </nav>
+
+  </aside>
+
+
+  <main class="main">
+
+    <div class="topbar">
+
+      <div>
+
+        <h1>Top Traders</h1>
+
+        <p class="subtitle">
+          Discover traders and choose who you want to copy.
+        </p>
+
+      </div>
+
+      <div class="balance">
+
+        <span>
+          Available Balance
+        </span>
+
+        <strong id="balance">
+          $0.00
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <section
+      class="traders-grid"
+      id="traders"
+    >
+
+      <div class="loading">
+        Loading traders...
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <script>
+
+    const API_URL = "http://localhost:5000";
+
+    const token = localStorage.getItem("token");
+
+
+    if (!token) {
+      window.location.href = "login.html";
+    }
+
+
+    function money(value) {
+
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD"
+      }).format(Number(value) || 0);
+
+    }
+
+
+    async function loadBalance() {
+
+      try {
+
+        const response = await fetch(
+          `${API_URL}/api/dashboard`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+
+
+        if (response.status === 401) {
+
+          logout();
+          return;
+
+        }
+
+
+        if (!response.ok) {
+          throw new Error("Unable to load balance");
+        }
+
+
+        const data = await response.json();
+
+
+        document.getElementById("balance").textContent =
+          money(data.balance);
+
+
+      } catch (error) {
+
+        console.error(
+          "BALANCE ERROR:",
+          error
+        );
+
+      }
+
+    }
+
+
+    async function loadTraders() {
+
+      const container =
+        document.getElementById("traders");
+
+
+      try {
+
+        const response = await fetch(
+          `${API_URL}/api/traders`
+        );
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            "Unable to load traders"
+          );
+
+        }
+
+
+        const data =
+          await response.json();
+
+
+        const traders =
+          data.traders || [];
+
+
+        container.innerHTML = "";
+
+
+        if (traders.length === 0) {
+
+          container.innerHTML = `
+            <div class="empty">
+              No traders are currently available.
+            </div>
+          `;
+
+          return;
+
+        }
+
+
+        traders.forEach(trader => {
+
+          const card =
+            document.createElement("div");
+
+
+          card.className =
+            "trader-card";
+
+
+          const name =
+            trader.name || "Trader";
+
+
+          const username =
+            trader.username || "";
+
+
+          const profit =
+            Number(
+              trader.profitPercentage || 0
+            );
+
+
+          const winRate =
+            Number(
+              trader.winRate || 0
+            );
+
+
+          const risk =
+            trader.riskLevel || "Unknown";
+
+
+          const initial =
+            name
+              .charAt(0)
+              .toUpperCase();
+
+
+          card.innerHTML = `
+
+            <div class="trader-header">
+
+              <div class="avatar">
+                ${escapeHtml(initial)}
+              </div>
+
+              <div class="status">
+                Active
+              </div>
+
+            </div>
+
+
+            <div class="trader-name">
+              ${escapeHtml(name)}
+            </div>
+
+
+            <div class="username">
+              ${escapeHtml(username)}
+            </div>
+
+
+            <div class="stats">
+
+              <div class="stat">
+
+                <div class="stat-label">
+                  Profit
+                </div>
+
+                <div class="stat-value profit">
+                  +${profit.toFixed(1)}%
+                </div>
+
+              </div>
+
+
+              <div class="stat">
+
+                <div class="stat-label">
+                  Risk
+                </div>
+
+                <div class="stat-value risk">
+                  ${escapeHtml(risk)}
+                </div>
+
+              </div>
+
+
+              <div class="stat">
+
+                <div class="stat-label">
+                  Win Rate
+                </div>
+
+                <div class="stat-value">
+                  ${winRate.toFixed(1)}%
+                </div>
+
+              </div>
+
+
+              <div class="stat">
+
+                <div class="stat-label">
+                  Status
+                </div>
+
+                <div class="stat-value profit">
+                  Active
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <button
+              class="copy-btn"
+              type="button"
+              onclick="copyTrader('${trader._id}')">
+
+              Copy Trader
+
+            </button>
+
+          `;
+
+
+          container.appendChild(card);
+
+        });
+
+
+      } catch (error) {
+
+        console.error(
+          "TRADERS ERROR:",
+          error
+        );
+
+
+        container.innerHTML = `
+
+          <div class="error">
+
+            Unable to load traders.
+
+            <br><br>
+
+            Make sure the backend is running on port 5000.
+
+          </div>
+
+        `;
+
+      }
+
+    }
+
+
+    function copyTrader(id) {
+
+      window.location.href =
+        `copy-trade.html?traderId=${encodeURIComponent(id)}`;
+
+    }
+
+
+    function logout() {
+
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+
+      window.location.href = "login.html";
+
+    }
+
+
+    function escapeHtml(value) {
+
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+    }
+
+
+    loadBalance();
+    loadTraders();
+
+  </script>
+
+</body>
+</html>
+```
