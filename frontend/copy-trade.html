@@ -1,4 +1,4 @@
-
+﻿
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -247,19 +247,19 @@
 
       <div class="trader-info">
         Username:
-        <span id="username">—</span>
+        <span id="username">â€”</span>
         <br>
 
         Profit:
-        <span class="profit" id="profit">—</span>
+        <span class="profit" id="profit">â€”</span>
         <br>
 
         Win Rate:
-        <span id="winRate">—</span>
+        <span id="winRate">â€”</span>
         <br>
 
         Risk:
-        <span id="riskLevel">—</span>
+        <span id="riskLevel">â€”</span>
       </div>
 
     </div>
@@ -287,7 +287,7 @@
 
         <div class="summary-row">
           <span>Trader</span>
-          <strong id="summaryTrader">—</strong>
+          <strong id="summaryTrader">â€”</strong>
         </div>
 
         <div class="summary-row">
@@ -315,7 +315,7 @@
     </form>
 
     <a class="back" href="traders.html">
-      ← Back to Traders
+      â† Back to Traders
     </a>
 
   </div>
@@ -325,7 +325,7 @@
 
 <script>
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://mirror-trading.onrender.com";
 
 const token = localStorage.getItem("token");
 
@@ -476,7 +476,7 @@ async function loadTrader() {
 
   document.getElementById("username")
     .textContent =
-      trader.username || "—";
+      trader.username || "â€”";
 
   document.getElementById("profit")
     .textContent =
@@ -732,3 +732,4 @@ init();
 
 </body>
 </html>
+

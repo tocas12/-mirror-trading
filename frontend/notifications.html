@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -316,7 +316,7 @@ body {
 
 <script>
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://mirror-trading.onrender.com";
 
 const token = localStorage.getItem("token");
 
@@ -347,22 +347,22 @@ function getIcon(type) {
     switch (type) {
 
         case "copy_trade":
-            return "↗";
+            return "â†—";
 
         case "transaction":
             return "$";
 
         case "profit_loss":
-            return "↑";
+            return "â†‘";
 
         case "security":
-            return "🔒";
+            return "ðŸ”’";
 
         case "account":
-            return "●";
+            return "â—";
 
         default:
-            return "●";
+            return "â—";
 
     }
 

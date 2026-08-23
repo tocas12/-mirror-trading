@@ -1,4 +1,4 @@
-```html
+﻿```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -407,27 +407,27 @@ td {
 
         <div class="stat">
             <div class="stat-label">Total Users</div>
-            <div class="stat-value" id="usersCount">—</div>
+            <div class="stat-value" id="usersCount">â€”</div>
         </div>
 
         <div class="stat">
             <div class="stat-label">Total Balances</div>
-            <div class="stat-value" id="balances">—</div>
+            <div class="stat-value" id="balances">â€”</div>
         </div>
 
         <div class="stat">
             <div class="stat-label">Active Traders</div>
-            <div class="stat-value" id="tradersCount">—</div>
+            <div class="stat-value" id="tradersCount">â€”</div>
         </div>
 
         <div class="stat">
             <div class="stat-label">Transactions</div>
-            <div class="stat-value" id="transactionsCount">—</div>
+            <div class="stat-value" id="transactionsCount">â€”</div>
         </div>
 
         <div class="stat">
             <div class="stat-label">Active Copy Trades</div>
-            <div class="stat-value" id="copyTradesCount">—</div>
+            <div class="stat-value" id="copyTradesCount">â€”</div>
         </div>
 
     </section>
@@ -581,7 +581,7 @@ td {
 
 <script>
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://mirror-trading.onrender.com";
 
 const token = localStorage.getItem("token");
 
@@ -707,7 +707,7 @@ async function verifyAdmin() {
         ).textContent =
             "Signed in as: " +
             (user.name || user.email) +
-            " • Administrator";
+            " â€¢ Administrator";
 
         return true;
 
@@ -1513,7 +1513,7 @@ async function loadCopyTrades() {
                                 ? new Date(
                                     copy.createdAt
                                   ).toLocaleDateString()
-                                : "—"
+                                : "â€”"
                         }
                     </td>
 
@@ -1701,7 +1701,7 @@ async function loadTransactions() {
                     <td>
                         ${escapeHtml(
                             transaction.description ||
-                            "—"
+                            "â€”"
                         )}
                     </td>
 
@@ -1718,7 +1718,7 @@ async function loadTransactions() {
                                 ? new Date(
                                     transaction.createdAt
                                   ).toLocaleString()
-                                : "—"
+                                : "â€”"
                         }
                     </td>
 
@@ -1776,3 +1776,4 @@ init();
 </body>
 </html>
 ```
+
