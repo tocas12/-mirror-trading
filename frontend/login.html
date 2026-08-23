@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -200,7 +201,7 @@ button:disabled {
 
 <script>
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://mirror-trading.onrender.com";
 
 const loginForm = document.getElementById("loginForm");
 const loginButton = document.getElementById("loginButton");
@@ -245,13 +246,13 @@ loginForm.addEventListener("submit", async function(event) {
       throw new Error(data.message || "Login failed");
     }
 
-    // Save authentication token
     localStorage.setItem("token", data.token);
-
-    // Save user information
     localStorage.setItem("user", JSON.stringify(data.user));
 
-    showMessage("Login successful. Redirecting...", "success");
+    showMessage(
+      "Login successful. Redirecting...",
+      "success"
+    );
 
     setTimeout(function() {
       window.location.href = "dashboard.html";
