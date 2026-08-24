@@ -1,5 +1,4 @@
-﻿
-const express = require("express");
+﻿const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
@@ -18,13 +17,9 @@ function createToken(userId) {
   }
 
   return jwt.sign(
-    {
-      userId
-    },
+    { userId },
     process.env.JWT_SECRET,
-    {
-      expiresIn: "7d"
-    }
+    { expiresIn: "7d" }
   );
 }
 
@@ -44,35 +39,29 @@ router.post("/register", async (req, res) => {
 
     if (!name || !email || !password) {
       return res.status(400).json({
-        message:
-          "Name, email and password are required"
+        message: "Name, email and password are required"
       });
     }
 
     if (password.length < 6) {
       return res.status(400).json({
-        message:
-          "Password must be at least 6 characters"
+        message: "Password must be at least 6 characters"
       });
     }
 
-    const normalizedEmail =
-      email.toLowerCase().trim();
+    const normalizedEmail = email.toLowerCase().trim();
 
-    const existingUser =
-      await User.findOne({
-        email: normalizedEmail
-      });
+    const existingUser = await User.findOne({
+      email: normalizedEmail
+    });
 
     if (existingUser) {
       return res.status(409).json({
-        message:
-          "An account with this email already exists"
+        message: "An account with this email already exists"
       });
     }
 
-    const hashedPassword =
-      await bcrypt.hash(password, 12);
+    const hashedPassword = await bcrypt.hash(password, 12);
 
     const newUser = await User.create({
       name: name.trim(),
@@ -82,15 +71,11 @@ router.post("/register", async (req, res) => {
       role: "user"
     });
 
-    const token =
-      createToken(newUser._id);
+    const token = createToken(newUser._id);
 
     res.status(201).json({
-      message:
-        "Account created successfully",
-
+      message: "Account created successfully",
       token,
-
       user: {
         id: newUser._id,
         name: newUser.name,
@@ -101,14 +86,10 @@ router.post("/register", async (req, res) => {
     });
 
   } catch (error) {
-    console.error(
-      "REGISTRATION ERROR:",
-      error
-    );
+    console.error("REGISTRATION ERROR:", error);
 
     res.status(500).json({
-      message:
-        "Unable to create account"
+      message: "Unable to create account"
     });
   }
 });
@@ -128,48 +109,38 @@ router.post("/login", async (req, res) => {
 
     if (!email || !password) {
       return res.status(400).json({
-        message:
-          "Email and password are required"
+        message: "Email and password are required"
       });
     }
 
-    const normalizedEmail =
-      email.toLowerCase().trim();
+    const normalizedEmail = email.toLowerCase().trim();
 
-    const user =
-      await User.findOne({
-        email: normalizedEmail
-      });
+    const user = await User.findOne({
+      email: normalizedEmail
+    });
 
     if (!user) {
       return res.status(401).json({
-        message:
-          "Invalid email or password"
+        message: "Invalid email or password"
       });
     }
 
-    const passwordMatch =
-      await bcrypt.compare(
-        password,
-        user.password
-      );
+    const passwordMatch = await bcrypt.compare(
+      password,
+      user.password
+    );
 
     if (!passwordMatch) {
       return res.status(401).json({
-        message:
-          "Invalid email or password"
+        message: "Invalid email or password"
       });
     }
 
-    const token =
-      createToken(user._id);
+    const token = createToken(user._id);
 
     res.json({
-      message:
-        "Login successful",
-
+      message: "Login successful",
       token,
-
       user: {
         id: user._id,
         name: user.name,
@@ -180,14 +151,10 @@ router.post("/login", async (req, res) => {
     });
 
   } catch (error) {
-    console.error(
-      "LOGIN ERROR:",
-      error
-    );
+    console.error("LOGIN ERROR:", error);
 
     res.status(500).json({
-      message:
-        "Unable to login"
+      message: "Unable to login"
     });
   }
 });
@@ -216,14 +183,10 @@ router.get(
       });
 
     } catch (error) {
-      console.error(
-        "GET USER ERROR:",
-        error
-      );
+      console.error("GET USER ERROR:", error);
 
       res.status(500).json({
-        message:
-          "Unable to retrieve user"
+        message: "Unable to retrieve user"
       });
     }
   }
@@ -240,12 +203,10 @@ router.post(
   authMiddleware,
   (req, res) => {
     res.json({
-      message:
-        "Logout successful"
+      message: "Logout successful"
     });
   }
 );
 
 
 module.exports = router;
-```
