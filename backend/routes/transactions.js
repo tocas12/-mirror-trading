@@ -1,4 +1,4 @@
-```js
+
 const express = require("express");
 
 const Transaction = require("../models/Transaction");
@@ -106,4 +106,3 @@ router.post("/", authMiddleware, async (req, res) => {
 
 
 module.exports = router;
-```
