@@ -1,9 +1,11 @@
-﻿const express = require("express");
+﻿```javascript
+const express = require("express");
 
 const User = require("../models/User");
 const Trader = require("../models/Trader");
 const Transaction = require("../models/Transaction");
 const CopyTrading = require("../models/CopyTrading");
+const Notification = require("../models/Notification");
 
 const adminMiddleware = require("../middleware/adminMiddleware");
 
@@ -348,6 +350,180 @@ router.get(
 
 
 // ======================================================
+// GET PENDING DEPOSITS
+// GET /api/admin/deposits/pending
+// ======================================================
+
+router.get(
+  "/deposits/pending",
+  adminMiddleware,
+  async (req, res) => {
+    try {
+      const deposits = await Transaction.find({
+        type: "deposit",
+        status: "pending"
+      })
+        .populate("user", "name email balance")
+        .sort({ createdAt: -1 });
+
+      res.json({
+        count: deposits.length,
+        deposits
+      });
+
+    } catch (error) {
+      console.error(
+        "ADMIN PENDING DEPOSITS ERROR:",
+        error
+      );
+
+      res.status(500).json({
+        message: "Unable to retrieve pending deposits"
+      });
+    }
+  }
+);
+
+
+// ======================================================
+// APPROVE DEPOSIT
+// PATCH /api/admin/deposits/:id/approve
+// ======================================================
+
+router.patch(
+  "/deposits/:id/approve",
+  adminMiddleware,
+  async (req, res) => {
+    try {
+      const transaction = await Transaction.findOne({
+        _id: req.params.id,
+        type: "deposit",
+        status: "pending"
+      });
+
+      if (!transaction) {
+        return res.status(404).json({
+          message: "Pending deposit not found"
+        });
+      }
+
+      const user = await User.findById(transaction.user);
+
+      if (!user) {
+        return res.status(404).json({
+          message: "User associated with deposit not found"
+        });
+      }
+
+      user.balance =
+        Number(user.balance || 0) +
+        Number(transaction.amount);
+
+      await user.save();
+
+      transaction.status = "completed";
+
+      transaction.description =
+        transaction.description +
+        " - Approved by admin";
+
+      await transaction.save();
+
+      await Notification.create({
+        user: user._id,
+        title: "Deposit Approved",
+        message:
+          "$" +
+          Number(transaction.amount).toFixed(2) +
+          " has been added to your account balance.",
+        type: "transaction",
+        isRead: false
+      });
+
+      res.json({
+        message: "Deposit approved successfully",
+        transactionId: transaction._id,
+        amount: transaction.amount,
+        balance: user.balance,
+        status: transaction.status
+      });
+
+    } catch (error) {
+      console.error(
+        "ADMIN APPROVE DEPOSIT ERROR:",
+        error
+      );
+
+      res.status(500).json({
+        message: "Unable to approve deposit"
+      });
+    }
+  }
+);
+
+
+// ======================================================
+// REJECT DEPOSIT
+// PATCH /api/admin/deposits/:id/reject
+// ======================================================
+
+router.patch(
+  "/deposits/:id/reject",
+  adminMiddleware,
+  async (req, res) => {
+    try {
+      const transaction = await Transaction.findOne({
+        _id: req.params.id,
+        type: "deposit",
+        status: "pending"
+      });
+
+      if (!transaction) {
+        return res.status(404).json({
+          message: "Pending deposit not found"
+        });
+      }
+
+      transaction.status = "failed";
+
+      transaction.description =
+        transaction.description +
+        " - Rejected by admin";
+
+      await transaction.save();
+
+      await Notification.create({
+        user: transaction.user,
+        title: "Deposit Rejected",
+        message:
+          "$" +
+          Number(transaction.amount).toFixed(2) +
+          " deposit request was rejected.",
+        type: "transaction",
+        isRead: false
+      });
+
+      res.json({
+        message: "Deposit rejected successfully",
+        transactionId: transaction._id,
+        status: transaction.status
+      });
+
+    } catch (error) {
+      console.error(
+        "ADMIN REJECT DEPOSIT ERROR:",
+        error
+      );
+
+      res.status(500).json({
+        message: "Unable to reject deposit"
+      });
+    }
+  }
+);
+
+
+// ======================================================
 // GET ALL TRANSACTIONS
 // GET /api/admin/transactions
 // ======================================================
@@ -380,3 +556,4 @@ router.get(
 
 
 module.exports = router;
+```
