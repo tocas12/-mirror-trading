@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿```html
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -73,7 +74,45 @@ input {
     font-size: 15px;
 }
 
-button {
+.wallet-box {
+    display: none;
+    margin-bottom: 20px;
+    padding: 18px;
+    background: #07111f;
+    border: 1px solid #334155;
+    border-radius: 10px;
+}
+
+.wallet-title {
+    color: #94a3b8;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.wallet-address {
+    word-break: break-all;
+    color: #4ade80;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 12px;
+}
+
+.copy-button {
+    width: 100%;
+    padding: 11px;
+    border: 1px solid #22c55e;
+    border-radius: 8px;
+    background: transparent;
+    color: #22c55e;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.copy-button:hover {
+    background: rgba(34, 197, 94, 0.1);
+}
+
+button[type="submit"] {
     width: 100%;
     padding: 15px;
     border: none;
@@ -85,8 +124,13 @@ button {
     cursor: pointer;
 }
 
-button:hover {
+button[type="submit"]:hover {
     background: #16a34a;
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .message {
@@ -94,6 +138,7 @@ button:hover {
     padding: 15px;
     border-radius: 8px;
     display: none;
+    line-height: 1.5;
 }
 
 .back {
@@ -101,6 +146,17 @@ button:hover {
     margin-top: 20px;
     color: #22c55e;
     text-decoration: none;
+}
+
+.notice {
+    margin-bottom: 25px;
+    padding: 14px;
+    border-radius: 8px;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    color: #bfdbfe;
+    font-size: 14px;
+    line-height: 1.5;
 }
 
 </style>
@@ -119,8 +175,12 @@ Mirror<span>Trading</span>
 <h1>Deposit</h1>
 
 <p class="description">
-Add funds to your Mirror Trading account.
+Choose a cryptocurrency and send your deposit to the wallet address shown below.
 </p>
+
+<div class="notice">
+Your deposit will be reviewed before funds are added to your account balance.
+</div>
 
 <form id="depositForm">
 
@@ -134,23 +194,43 @@ Asset
 Select asset
 </option>
 
-<option value="btc">
+<option value="BTC">
 Bitcoin (BTC)
 </option>
 
-<option value="eth">
-Ethereum (ETH)
+<option value="USDT_TRC20">
+USDT (TRC20)
 </option>
 
-<option value="usdt">
-Tether (USDT)
+<option value="USDT_ERC20">
+USDT (ERC20)
 </option>
 
-<option value="usdc">
-USD Coin (USDC)
+<option value="USDT_BEP20">
+USDT (BEP20)
 </option>
 
 </select>
+
+
+<div id="walletBox" class="wallet-box">
+
+<div class="wallet-title">
+Deposit wallet address
+</div>
+
+<div id="walletAddress" class="wallet-address">
+Loading...
+</div>
+
+<button
+    type="button"
+    class="copy-button"
+    id="copyButton">
+    Copy Address
+</button>
+
+</div>
 
 
 <label for="amount">
@@ -168,7 +248,7 @@ Amount
 
 
 <button type="submit" id="depositButton">
-Continue
+I Have Sent The Deposit
 </button>
 
 <div id="message" class="message"></div>
@@ -177,7 +257,7 @@ Continue
 
 
 <a class="back" href="dashboard.html">
-â† Back to Dashboard
+← Back to Dashboard
 </a>
 
 </div>
@@ -191,24 +271,153 @@ const API_URL = "https://mirror-trading.onrender.com";
 
 const token = localStorage.getItem("token");
 
+let wallets = {};
 
-// Check login
+
+// ======================================================
+// CHECK LOGIN
+// ======================================================
 
 if (!token) {
-
     window.location.href = "login.html";
-
 }
 
 
-// Deposit
+// ======================================================
+// LOAD DEPOSIT WALLETS
+// ======================================================
+
+async function loadWallets() {
+
+    try {
+
+        const response = await fetch(
+            API_URL + "/api/transactions/deposit-wallets",
+            {
+                headers: {
+                    "Authorization": "Bearer " + token
+                }
+            }
+        );
+
+        const data = await response.json();
+
+        if (response.status === 401) {
+
+            localStorage.removeItem("token");
+            window.location.href = "login.html";
+            return;
+
+        }
+
+        if (!response.ok) {
+            throw new Error(
+                data.message || "Unable to load deposit wallets"
+            );
+        }
+
+        wallets = data.wallets || {};
+
+    } catch (error) {
+
+        console.error(
+            "WALLET LOAD ERROR:",
+            error
+        );
+
+        showMessage(
+            error.message,
+            "error"
+        );
+    }
+}
+
+
+// ======================================================
+// SHOW SELECTED WALLET
+// ======================================================
+
+document
+.getElementById("asset")
+.addEventListener("change", function() {
+
+    const asset = this.value;
+
+    const walletBox =
+        document.getElementById("walletBox");
+
+    const walletAddress =
+        document.getElementById("walletAddress");
+
+    if (!asset) {
+
+        walletBox.style.display = "none";
+        return;
+
+    }
+
+    const address = wallets[asset];
+
+    if (!address) {
+
+        walletAddress.textContent =
+            "Deposit address is not configured yet.";
+
+        walletBox.style.display = "block";
+
+        return;
+    }
+
+    walletAddress.textContent = address;
+
+    walletBox.style.display = "block";
+
+});
+
+
+// ======================================================
+// COPY WALLET ADDRESS
+// ======================================================
+
+document
+.getElementById("copyButton")
+.addEventListener("click", async function() {
+
+    const address =
+        document.getElementById("walletAddress").textContent;
+
+    if (!address || address.includes("not configured")) {
+        return;
+    }
+
+    try {
+
+        await navigator.clipboard.writeText(address);
+
+        this.textContent = "Copied!";
+
+        setTimeout(() => {
+            this.textContent = "Copy Address";
+        }, 1500);
+
+    } catch (error) {
+
+        alert("Unable to copy address. Please copy it manually.");
+
+    }
+
+});
+
+
+// ======================================================
+// DEPOSIT SUBMISSION
+// ======================================================
 
 document
 .getElementById("depositForm")
-.addEventListener("submit", async function(event) {
+.addEventListener("submit", function(event) {
 
     event.preventDefault();
-
 
     const asset =
         document.getElementById("asset").value;
@@ -216,87 +425,58 @@ document
     const amount =
         Number(document.getElementById("amount").value);
 
-    const button =
-        document.getElementById("depositButton");
+    if (!asset) {
+
+        showMessage(
+            "Please select a cryptocurrency.",
+            "error"
+        );
+
+        return;
+    }
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+
+        showMessage(
+            "Please enter a valid deposit amount.",
+            "error"
+        );
+
+        return;
+    }
+
+    const address = wallets[asset];
+
+    if (!address) {
+
+        showMessage(
+            "A deposit wallet has not been configured for this asset yet.",
+            "error"
+        );
+
+        return;
+    }
+
+    showMessage(
+        "Deposit instructions displayed. Send the funds to the wallet address above. Your deposit must be verified before your account balance is updated.",
+        "success"
+    );
+
+});
+
+
+// ======================================================
+// MESSAGE
+// ======================================================
+
+function showMessage(text, type) {
 
     const message =
         document.getElementById("message");
 
+    message.style.display = "block";
 
-    if (!asset || !amount || amount <= 0) {
-
-        alert("Please select an asset and enter a valid amount.");
-
-        return;
-
-    }
-
-
-    button.disabled = true;
-
-    button.textContent = "Processing...";
-
-
-    try {
-
-        const response = await fetch(
-            `${API_URL}/api/wallet/deposit`,
-            {
-
-                method: "POST",
-
-                headers: {
-
-                    "Content-Type": "application/json",
-
-                    "Authorization":
-                        `Bearer ${token}`
-
-                },
-
-                body: JSON.stringify({
-
-                    amount: amount
-
-                })
-
-            }
-        );
-
-
-        const data =
-            await response.json();
-
-
-        console.log(
-            "DEPOSIT RESPONSE:",
-            data
-        );
-
-
-        if (response.status === 401) {
-
-            localStorage.removeItem("token");
-
-            window.location.href =
-                "login.html";
-
-            return;
-
-        }
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                data.message ||
-                "Deposit failed"
-            );
-
-        }
-
-
-        message.style.display = "block";
+    if (type === "success") {
 
         message.style.background =
             "rgba(34,197,94,.12)";
@@ -304,51 +484,27 @@ document
         message.style.color =
             "#4ade80";
 
-        message.textContent =
-            "Deposit successful! New balance: $" +
-            Number(data.balance).toFixed(2);
-
-
-        document.getElementById("amount").value = "";
-
-
-        setTimeout(function() {
-
-            window.location.href =
-                "dashboard.html";
-
-        }, 1500);
-
-
-    } catch (error) {
-
-        console.error(
-            "DEPOSIT ERROR:",
-            error
-        );
-
-
-        message.style.display = "block";
+    } else {
 
         message.style.background =
             "rgba(239,68,68,.12)";
 
         message.style.color =
             "#fca5a5";
-
-        message.textContent =
-            error.message;
-
     }
 
+    message.textContent = text;
+}
 
-    button.disabled = false;
 
-    button.textContent = "Continue";
+// ======================================================
+// START
+// ======================================================
 
-});
+loadWallets();
 
 </script>
 
 </body>
 </html>
+```
