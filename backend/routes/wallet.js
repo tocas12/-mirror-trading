@@ -1,3 +1,4 @@
+
 const express = require("express");
 
 const User = require("../models/User");
@@ -8,13 +9,84 @@ const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
+
+// ======================================================
+// DEPOSIT METHODS
+// GET /api/wallet/deposit-methods
+// ======================================================
+
+router.get("/deposit-methods", (req, res) => {
+  const methods = [
+    {
+      id: "btc",
+      currency: "BTC",
+      network: "Bitcoin",
+      address: process.env.BTC_DEPOSIT_ADDRESS || ""
+    },
+    {
+      id: "usdt_trc20",
+      currency: "USDT",
+      network: "TRC20",
+      address: process.env.USDT_TRC20_ADDRESS || ""
+    },
+    {
+      id: "usdt_erc20",
+      currency: "USDT",
+      network: "ERC20",
+      address: process.env.USDT_ERC20_ADDRESS || ""
+    },
+    {
+      id: "usdt_bep20",
+      currency: "USDT",
+      network: "BEP20",
+      address: process.env.USDT_BEP20_ADDRESS || ""
+    }
+  ];
+
+  res.json({
+    methods
+  });
+});
+
+
+// ======================================================
+// RECORD DEPOSIT REQUEST
+// POST /api/wallet/deposit
+// ======================================================
+//
+// For a real payment system, this should create a
+// pending deposit request. Do NOT automatically credit
+// the balance just because a client submits a request.
+// The payment should be verified before the balance changes.
+// ======================================================
+
 router.post("/deposit", authMiddleware, async (req, res) => {
   try {
     const amount = Number(req.body.amount);
+    const method = String(req.body.method || "").trim();
 
     if (!Number.isFinite(amount) || amount <= 0) {
       return res.status(400).json({
         message: "Deposit amount must be greater than zero"
+      });
+    }
+
+    if (!method) {
+      return res.status(400).json({
+        message: "Deposit method is required"
+      });
+    }
+
+    const validMethods = [
+      "btc",
+      "usdt_trc20",
+      "usdt_erc20",
+      "usdt_bep20"
+    ];
+
+    if (!validMethods.includes(method)) {
+      return res.status(400).json({
+        message: "Invalid deposit method"
       });
     }
 
@@ -26,28 +98,30 @@ router.post("/deposit", authMiddleware, async (req, res) => {
       });
     }
 
-    user.balance = Number(user.balance) + amount;
-    await user.save();
-
-    await Transaction.create({
+    // Create a pending transaction instead of immediately
+    // adding funds to the user's balance.
+    const transaction = await Transaction.create({
       user: user._id,
       type: "deposit",
       amount: amount,
-      description: "Deposit of $" + amount.toFixed(2),
-      status: "completed"
+      description: `Deposit request via ${method}`,
+      status: "pending"
     });
 
     await Notification.create({
       user: user._id,
-      title: "Deposit Successful",
-      message: "$" + amount.toFixed(2) + " has been added to your account balance.",
+      title: "Deposit Submitted",
+      message:
+        `$${amount.toFixed(2)} deposit request submitted via ${method}. ` +
+        "Your balance will be updated after verification.",
       type: "transaction",
       isRead: false
     });
 
     res.status(201).json({
-      message: "Deposit completed successfully",
-      amount: amount,
+      message: "Deposit request submitted",
+      transactionId: transaction._id,
+      status: "pending",
       balance: user.balance
     });
 
@@ -55,11 +129,16 @@ router.post("/deposit", authMiddleware, async (req, res) => {
     console.error("DEPOSIT ERROR:", error);
 
     res.status(500).json({
-      message: "Unable to process deposit"
+      message: "Unable to process deposit request"
     });
   }
 });
 
+
+// ======================================================
+// WITHDRAW
+// POST /api/wallet/withdraw
+// ======================================================
 
 router.post("/withdraw", authMiddleware, async (req, res) => {
   try {
@@ -99,7 +178,9 @@ router.post("/withdraw", authMiddleware, async (req, res) => {
     await Notification.create({
       user: user._id,
       title: "Withdrawal Successful",
-      message: "$" + amount.toFixed(2) + " has been withdrawn from your account.",
+      message:
+        "$" + amount.toFixed(2) +
+        " has been withdrawn from your account.",
       type: "transaction",
       isRead: false
     });
@@ -119,6 +200,11 @@ router.post("/withdraw", authMiddleware, async (req, res) => {
   }
 });
 
+
+// ======================================================
+// TRANSFER
+// POST /api/wallet/transfer
+// ======================================================
 
 router.post("/transfer", authMiddleware, async (req, res) => {
   try {
@@ -186,7 +272,10 @@ router.post("/transfer", authMiddleware, async (req, res) => {
     await Notification.create({
       user: sender._id,
       title: "Transfer Successful",
-      message: "$" + amount.toFixed(2) + " was transferred to " + recipient.name + ".",
+      message:
+        "$" + amount.toFixed(2) +
+        " was transferred to " +
+        recipient.name + ".",
       type: "transaction",
       isRead: false
     });
@@ -194,7 +283,10 @@ router.post("/transfer", authMiddleware, async (req, res) => {
     await Notification.create({
       user: recipient._id,
       title: "Transfer Received",
-      message: "$" + amount.toFixed(2) + " was received from " + sender.name + ".",
+      message:
+        "$" + amount.toFixed(2) +
+        " was received from " +
+        sender.name + ".",
       type: "transaction",
       isRead: false
     });
