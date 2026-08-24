@@ -13,6 +13,7 @@ const transactionSchema = new mongoose.Schema(
       enum: [
         "deposit",
         "withdrawal",
+        "transfer",
         "copy_trade",
         "profit",
         "loss"
@@ -22,7 +23,8 @@ const transactionSchema = new mongoose.Schema(
 
     amount: {
       type: Number,
-      required: true
+      required: true,
+      min: 0
     },
 
     description: {
